@@ -136,11 +136,14 @@ public final class KidsRemote {
     private void handle(Socket c) throws IOException {
         OutputStream out = c.getOutputStream();
         Request r = read(c.getInputStream());
+        KidsLanguage.apply(ctx);
         if (r == null) {
             send(out, "400 Bad Request", "text/plain", new byte[0]);
         } else if (r.method.equals("GET")) {
             if (r.path.equals("/")) {
-                send(out, "200 OK", "text/html; charset=utf-8", readAll(ctx.getResources().openRawResource(R.raw.sc_remote)));
+                String page = new String(readAll(ctx.getResources().openRawResource(R.raw.sc_remote)), StandardCharsets.UTF_8);
+                send(out, "200 OK", "text/html; charset=utf-8",
+                        page.replace("%LANG%", KidsLanguage.shown(ctx)).getBytes(StandardCharsets.UTF_8));
             } else if (r.path.startsWith("/art/") && RemoteText.safeArt(r.path.substring(5))) {
                 art(out, r.path.substring(5));
             } else {
@@ -438,7 +441,7 @@ public final class KidsRemote {
     /** Führt eine Aktion aus; ergibt einen Fehlertext für das Handy oder null. */
     private synchronized String act(Map<String, String> q) {
         String a = q.get("a");
-        if (a == null) return "Unbekannte Aktion";
+        if (a == null) return ctx.getString(R.string.sc_err_action);
         switch (a) {
             case "lock":
                 gate.setLockedNow("1".equals(q.get("v")));
@@ -448,14 +451,14 @@ public final class KidsRemote {
                 return null;
             case "msg":
                 String text = q.get("text");
-                if (text == null || text.trim().isEmpty()) return "Kein Text";
+                if (text == null || text.trim().isEmpty()) return ctx.getString(R.string.sc_err_no_text);
                 listener.onMessage(RemoteText.limited(text.trim(), MAX_MESSAGE));
                 return null;
             case "settings":
                 listener.onOpenSettings();
                 return null;
             case "pin":
-                if (!PinHash.valid(q.get("v"))) return "Die PIN braucht 4 Ziffern";
+                if (!PinHash.valid(q.get("v"))) return ctx.getString(R.string.sc_err_pin);
                 lock.setPin(q.get("v"));
                 return null;
             case "devices":
@@ -463,20 +466,20 @@ public final class KidsRemote {
                 return null;
             case "add":
                 String kidName = q.get("name");
-                if (kidName == null || kidName.trim().isEmpty()) return "Kein Name";
+                if (kidName == null || kidName.trim().isEmpty()) return ctx.getString(R.string.sc_err_no_name);
                 profiles.add(RemoteText.limited(kidName.trim(), MAX_NAME));
                 return null;
             case "confirm":
-                return db.confirm(profiles, RemoteText.number(q.get("run"), 0)) < 0 ? "Schon entschieden" : null;
+                return db.confirm(profiles, RemoteText.number(q.get("run"), 0)) < 0 ? ctx.getString(R.string.sc_err_decided) : null;
             case "reject":
                 String reason = RemoteText.limited(q.containsKey("reason") ? q.get("reason") : "", MAX_MESSAGE);
-                return db.reject(RemoteText.number(q.get("run"), 0), reason) ? null : "Schon entschieden";
+                return db.reject(RemoteText.number(q.get("run"), 0), reason) ? null : ctx.getString(R.string.sc_err_decided);
             case "taskdel":
                 db.deleteTask(RemoteText.number(q.get("task"), 0));
                 return null;
             default:
                 KidsProfile p = profiles.byId(q.get("id"));
-                return p == null ? "Kind nicht gefunden" : childAct(a, p, q);
+                return p == null ? ctx.getString(R.string.sc_err_no_child) : childAct(a, p, q);
         }
     }
 
@@ -485,7 +488,7 @@ public final class KidsRemote {
         switch (a) {
             case "app":
                 String pkg = q.get("pkg");
-                if (pkg == null || KidsLock.settingsPackages(ctx).contains(pkg)) return "App nicht erlaubt";
+                if (pkg == null || KidsLock.settingsPackages(ctx).contains(pkg)) return ctx.getString(R.string.sc_err_app_denied);
                 if (!p.allowed.contains(pkg)) {
                     p.allowed.add(pkg);
                 } else if (!p.favorites.contains(pkg)) {
@@ -497,7 +500,7 @@ public final class KidsRemote {
                 break;
             case "free":
                 String freePkg = q.get("pkg");
-                if (freePkg == null) return "App fehlt";
+                if (freePkg == null) return ctx.getString(R.string.sc_err_no_app);
                 if (!p.free.remove(freePkg)) p.free.add(freePkg);
                 break;
             case "time":
@@ -515,13 +518,13 @@ public final class KidsRemote {
                 break;
             case "correct":
                 String note = q.get("note");
-                db.correct(p, v, RemoteText.limited(note != null ? note : "Korrektur", MAX_TITLE));
+                db.correct(p, v, RemoteText.limited(note != null ? note : ctx.getString(R.string.sc_log_correction), MAX_TITLE));
                 return null;
             case "task":
                 return saveTask(p, q);
             case "name":
                 String name = q.get("name");
-                if (name == null || name.trim().isEmpty()) return "Kein Name";
+                if (name == null || name.trim().isEmpty()) return ctx.getString(R.string.sc_err_no_name);
                 p.name = RemoteText.limited(name.trim(), MAX_NAME);
                 break;
             case "avatar":
@@ -532,7 +535,7 @@ public final class KidsRemote {
                 profiles.remove(p);
                 return null;
             default:
-                return "Unbekannte Aktion";
+                return ctx.getString(R.string.sc_err_action);
         }
         profiles.save(p);
         return null;
@@ -540,7 +543,7 @@ public final class KidsRemote {
 
     private String saveTask(KidsProfile p, Map<String, String> q) {
         String title = q.get("title");
-        if (title == null || title.trim().isEmpty()) return "Die Aufgabe braucht einen Namen";
+        if (title == null || title.trim().isEmpty()) return ctx.getString(R.string.sc_err_task_name);
         String desc = q.get("desc");
         KidsDb.Task t = new KidsDb.Task();
         t.id = RemoteText.number(q.get("task"), 0);

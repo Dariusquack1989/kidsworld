@@ -24,6 +24,7 @@ public final class KidsLock {
 
     private static final String PREFS = "sc_kids";
     private static final String KEY_CALM = "calm_motion";
+    private static final String KEY_LANGUAGE = "language";
     private static final String KEY_SALT = "pin_salt";
     private static final String KEY_HASH = "pin_hash";
     private static final String KEY_FAILS = "pin_fails";
@@ -41,6 +42,14 @@ public final class KidsLock {
     }
 
     /** Ruhige Animationen: weniger Bewegung und keine Überraschungen. */
+    public String language() {
+        return prefs.getString(KEY_LANGUAGE, KidsLanguage.AUTO);
+    }
+
+    public void setLanguage(String language) {
+        prefs.edit().putString(KEY_LANGUAGE, language).apply();
+    }
+
     public boolean calmMotion() {
         return prefs.getBoolean(KEY_CALM, false);
     }

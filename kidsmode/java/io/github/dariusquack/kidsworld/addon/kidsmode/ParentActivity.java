@@ -46,6 +46,8 @@ public final class ParentActivity extends Activity {
     private KidsDb db;
     private LinearLayout root;
     private Typeface regular, medium;
+    /** Position des Sprach-Knopfs im Menü: Er behält den Fokus, damit man weiterschalten kann. */
+    private int languageRow;
 
     // PIN-Eingabe
     private Mode mode;
@@ -56,6 +58,7 @@ public final class ParentActivity extends Activity {
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
+        KidsLanguage.apply(this);
         lock = new KidsLock(this);
         profiles = new KidsProfiles(this);
         gate = new KidsGate(this);
@@ -242,6 +245,15 @@ public final class ParentActivity extends Activity {
             lock.setCalmMotion(!lock.calmMotion());
             showMenu();
         });
+        String language = lock.language();
+        View languageButton = menuButton(KidsLanguage.GERMAN.equals(language) ? R.string.sc_parent_lang_de
+                : KidsLanguage.ENGLISH.equals(language) ? R.string.sc_parent_lang_en : R.string.sc_parent_lang_auto, v -> {
+            lock.setLanguage(KidsLanguage.next(lock.language()));
+            KidsLanguage.apply(this);
+            showMenu();
+            root.getChildAt(languageRow).requestFocus();
+        });
+        languageRow = root.indexOfChild(languageButton);
         menuButton(R.string.sc_parent_settings, v -> {
             lock.pauseGuard();
             HomeApps.openSettings(this);

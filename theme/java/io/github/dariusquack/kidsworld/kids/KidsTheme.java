@@ -32,6 +32,7 @@ import io.github.dariusquack.kidsworld.IconColors;
 import io.github.dariusquack.kidsworld.addon.kidsmode.KidsArt;
 import io.github.dariusquack.kidsworld.addon.kidsmode.KidsDb;
 import io.github.dariusquack.kidsworld.addon.kidsmode.KidsGate;
+import io.github.dariusquack.kidsworld.addon.kidsmode.KidsLanguage;
 import io.github.dariusquack.kidsworld.addon.kidsmode.KidsLock;
 import io.github.dariusquack.kidsworld.addon.kidsmode.KidsProfile;
 import io.github.dariusquack.kidsworld.addon.kidsmode.KidsProfiles;
@@ -59,7 +60,7 @@ public final class KidsTheme implements HomeTheme {
     private final Runnable gateCheck = this::checkGate;
     private final Runnable hideToast = this::hideToast;
     private KidsGate gate;
-    private String shownProfile, shownRow;
+    private String shownProfile, shownRow, shownLanguage;
     private View toast, block, hint;
     private ImageView toastArt;
     private TextView toastText, blockTitle, blockText;
@@ -78,6 +79,8 @@ public final class KidsTheme implements HomeTheme {
     @Override
     public View create(HomeActivity host) {
         this.host = host;
+        KidsLanguage.apply(host);
+        shownLanguage = KidsLanguage.shown(host);
         lock = new KidsLock(host);
         profiles = new KidsProfiles(host);
         gate = new KidsGate(host);
@@ -300,6 +303,10 @@ public final class KidsTheme implements HomeTheme {
     public void onResume() {
         // Zurück auf der Kinder-Startseite: eine Wächter-Pause aus dem Elternbereich endet hier.
         lock.resumeGuard();
+        if (!shownLanguage.equals(KidsLanguage.shown(host))) {
+            host.recreate();
+            return;
+        }
         applyProfile();
         stage.setRunning(true);
         KidsGate.setListener(() -> handler.post(this::checkGate));

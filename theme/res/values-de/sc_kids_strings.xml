@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Kids World, Deutsch. -->
+<resources>
+    <string name="sc_kids_space">Weltraum</string>
+    <string name="sc_kids_sea">Unterwasser</string>
+    <string name="sc_kids_jungle">Dschungel</string>
+    <string name="sc_kids_magic">Zauberwelt</string>
+    <string name="sc_kids_who">Wer spielt heute?</string>
+    <string name="sc_kids_parents">Eltern</string>
+    <string name="sc_kids_hint">▲ ▼  Welt wechseln</string>
+    <string name="sc_kids_empty">Noch keine Apps freigegeben.</string>
+    <string name="sc_kids_limit_text">Deine Zeit ist um. Erledige eine Aufgabe oder komm morgen wieder!</string>
+    <string name="sc_kids_bed_title">Schlafenszeit</string>
+    <string name="sc_kids_bed_text">Gute Nacht! Bis morgen.</string>
+    <string name="sc_kids_lock_title">Pause</string>
+    <string name="sc_kids_lock_text">Der Fernseher macht gerade Pause.</string>
+    <string name="sc_kids_tasks">Meine Aufgaben</string>
+    <string name="sc_kids_tasks_count">Meine Aufgaben (%1$d)</string>
+    <string name="sc_kids_tasks_none">Heute gibt es keine Aufgaben.</string>
+    <string name="sc_kids_tasks_back">OK: Aufgabe ist fertig · Zurück: zur Startseite</string>
+    <string name="sc_kids_time_left">noch übrig</string>
+    <string name="sc_kids_time_used">verbraucht</string>
+    <string name="sc_kids_time_earned">heute verdient</string>
+    <string name="sc_kids_minutes">%1$d Min.</string>
+    <string name="sc_kids_plus">+%1$d Min.</string>
+    <string name="sc_kids_task_open">offen</string>
+    <string name="sc_kids_task_free">heute frei</string>
+    <string name="sc_kids_task_waiting">wartet auf Bestätigung</string>
+    <string name="sc_kids_task_done">geschafft</string>
+    <string name="sc_kids_task_again">nochmal versuchen</string>
+    <string name="sc_kids_time_pill">Noch %1$d Min.</string>
+    <string name="sc_kids_time_over">Zeit ist um</string>
+    <string name="sc_kids_credit">Super! +%1$d Minuten: %2$s</string>
+</resources>

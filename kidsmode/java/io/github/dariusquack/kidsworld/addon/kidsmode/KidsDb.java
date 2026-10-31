@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.SystemClock;
 
+import com.gathin.tvhome.R;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -48,10 +50,12 @@ public final class KidsDb extends SQLiteOpenHelper {
     }
 
     private final SharedPreferences clock;
+    private final Context app;
 
     private KidsDb(Context ctx) {
         super(ctx.getApplicationContext(), "kids.db", null, 1);
         clock = ctx.getApplicationContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        app = ctx.getApplicationContext();
     }
 
     public static synchronized KidsDb get(Context ctx) {
@@ -88,7 +92,7 @@ public final class KidsDb extends SQLiteOpenHelper {
         long wall = System.currentTimeMillis(), elapsed = SystemClock.elapsedRealtime();
         long jump = KidsCalendar.clockJump(clock.getLong("wall", 0), clock.getLong("elapsed", 0), wall, elapsed);
         int day = KidsCalendar.logicalDay(clock.getInt("day", 0), wallDay());
-        if (jump != 0) log("", day, 0, CLOCK, "Uhr um " + jump / 60_000 + " Minuten verstellt");
+        if (jump != 0) log("", day, 0, CLOCK, app.getString(R.string.sc_log_clock, (int) (jump / 60_000)));
         clock.edit().putLong("wall", wall).putLong("elapsed", elapsed).putInt("day", day).apply();
         return day;
     }
@@ -139,7 +143,7 @@ public final class KidsDb extends SQLiteOpenHelper {
         Account y = accountOn(p.id, day - 1);
         int carry = MediaTime.carry(p, y.extra, y.sum, y.usedMs);
         carry = MediaTime.creditable(p, carry, 0, 0);
-        log(p.id, day, carry, CARRY, "Übertrag von gestern");
+        log(p.id, day, carry, CARRY, app.getString(R.string.sc_log_carry));
     }
 
     public synchronized void addUsage(String kid, long ms) {
@@ -155,7 +159,7 @@ public final class KidsDb extends SQLiteOpenHelper {
         Account a = account(p);
         int real = MediaTime.correctable(p, minutes, a.sum);
         if (real != 0) {
-            log(p.id, today(), real, CORRECTION, real == minutes ? note : note + " (begrenzt, gewünscht " + minutes + ")");
+            log(p.id, today(), real, CORRECTION, real == minutes ? note : app.getString(R.string.sc_log_capped, note, minutes));
         }
         return real;
     }
@@ -379,7 +383,7 @@ public final class KidsDb extends SQLiteOpenHelper {
         v.put("minutes", real);
         v.put("kind", TASK);
         v.put("run_id", runId);
-        v.put("note", real == minutes ? title : title + " (begrenzt, " + minutes + " vorgesehen)");
+        v.put("note", real == minutes ? title : app.getString(R.string.sc_log_capped, title, minutes));
         v.put("time", System.currentTimeMillis());
         db.insertOrThrow("ledger", null, v);
         return real;

@@ -7,7 +7,7 @@ confirms it on the phone, and the minutes are added.
 
 ![Kids World](screenshot.jpg)
 
-The app text is German for now.
+The app follows the TV's language: English, or German on a German TV. A parent can also fix the language in the parent area.
 
 ## What it does
 

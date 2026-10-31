@@ -155,6 +155,7 @@ public final class KidsGuard extends AccessibilityService {
     /** Große Nachricht über allem, auch über laufenden Apps. Eine neue ersetzt die alte. */
     private void showMessage(String text) {
         hideMessage();
+        KidsLanguage.apply(this);
         LinearLayout box = new LinearLayout(this);
         box.setOrientation(LinearLayout.VERTICAL);
         box.setGravity(Gravity.CENTER);
