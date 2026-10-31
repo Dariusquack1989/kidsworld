@@ -5,9 +5,22 @@ A home screen for Android TV made for children, built on the
 and only the apps a parent allowed. Homework earns extra screen time: a child reports a task on the TV, a parent
 confirms it on the phone, and the minutes are added.
 
-![Kids World](screenshot.jpg)
+![Kids World in motion: worlds, tasks and profiles](media/demo.gif)
 
 The app follows the TV's language: English, or German on a German TV. A parent can also fix the language in the parent area.
+
+## Screenshots
+
+| | |
+|---|---|
+| ![Outer space world](media/home.jpg) | ![Under the sea world](media/world-sea.jpg) |
+| ![Jungle world](media/world-jungle.jpg) | ![Magic world](media/world-magic.jpg) |
+| ![Task list on the TV](media/tasks.jpg) | ![Who is playing today](media/profiles.jpg) |
+| ![PIN entry](media/parent-pin.jpg) | ![Parent area](media/parent.jpg) |
+| ![Turning apps on and off](media/parent-apps.jpg) | ![Phone page: tasks](media/phone-tasks.jpg) |
+| ![Phone page: screen time](media/phone-time.jpg) | |
+
+The pictures come from the Android TV emulator with sample data. The network address in the parent area is blurred.
 
 ## What it does
 
