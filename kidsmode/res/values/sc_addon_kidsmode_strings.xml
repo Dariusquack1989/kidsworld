@@ -63,5 +63,6 @@
     <string name="sc_log_correction">Correction</string>
     <string name="sc_log_carry">Carried over from yesterday</string>
     <string name="sc_log_clock">Clock changed by %1$d min</string>
+    <string name="sc_log_guard">Guard was off since %1$s</string>
     <string name="sc_log_capped">%1$s (capped, %2$d requested)</string>
 </resources>

@@ -63,5 +63,6 @@
     <string name="sc_log_correction">Korrektur</string>
     <string name="sc_log_carry">Übertrag von gestern</string>
     <string name="sc_log_clock">Uhr um %1$d Minuten verstellt</string>
+    <string name="sc_log_guard">Wächter war aus seit %1$s</string>
     <string name="sc_log_capped">%1$s (begrenzt, %2$d gewünscht)</string>
 </resources>

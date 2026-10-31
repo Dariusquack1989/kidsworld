@@ -32,6 +32,7 @@ import io.github.dariusquack.kidsworld.IconColors;
 import io.github.dariusquack.kidsworld.addon.kidsmode.KidsArt;
 import io.github.dariusquack.kidsworld.addon.kidsmode.KidsDb;
 import io.github.dariusquack.kidsworld.addon.kidsmode.KidsGate;
+import io.github.dariusquack.kidsworld.addon.kidsmode.KidsGuard;
 import io.github.dariusquack.kidsworld.addon.kidsmode.KidsLanguage;
 import io.github.dariusquack.kidsworld.addon.kidsmode.KidsLock;
 import io.github.dariusquack.kidsworld.addon.kidsmode.KidsProfile;
@@ -107,6 +108,7 @@ public final class KidsTheme implements HomeTheme {
             @Override
             public void onLaunch(int index) {
                 if (index >= shown.size()) showTasks();
+                else if (guardMissing(shown.get(index).pkg)) showToast(host.getString(R.string.sc_kids_call_parents), false);
                 else if (gate.mayRun(shown.get(index).pkg)) host.launch(shown.get(index));
                 else if (gate.block() == KidsTime.Block.LIMIT) showToast(host.getString(R.string.sc_kids_limit_text), false);
                 else checkGate();
@@ -212,6 +214,13 @@ public final class KidsTheme implements HomeTheme {
 
     private void markTask(KidsDb.Task t) {
         if (db.markDone(profiles.active(), t.id)) refreshTasks();
+    }
+
+    /** Ohne Wächter zählt keine Zeit: Zählende Apps starten dann nicht, bis die Eltern es geprüft haben. */
+    private boolean guardMissing(String pkg) {
+        if (KidsGuard.running() || profiles.active().free.contains(pkg)) return false;
+        lock.markGuardDown();
+        return true;
     }
 
     private void closeTasks() {

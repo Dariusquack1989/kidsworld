@@ -48,4 +48,14 @@ public class RemoteTextTest {
         assertFalse(RemoteText.safeArt("avatare/../x.png"));
         assertFalse(RemoteText.safeArt("hintergruende/x.png"));
     }
+
+    @Test
+    public void onlyLocalRequests() {
+        assertTrue(RemoteText.localRequest("192.168.1.50:8686", null));
+        assertTrue(RemoteText.localRequest("192.168.1.50:8686", "http://192.168.1.50:8686"));
+        assertTrue(RemoteText.localRequest("localhost:8686", null));
+        assertFalse(RemoteText.localRequest("evil.example:8686", null));
+        assertFalse(RemoteText.localRequest("192.168.1.50:8686", "http://evil.example"));
+        assertFalse(RemoteText.localRequest(null, null));
+    }
 }

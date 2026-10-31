@@ -59,7 +59,7 @@ public final class KidsRemote {
     }
 
     private static final class Request {
-        String method, path, token;
+        String method, path, token, host, origin;
         Map<String, String> params = new HashMap<>();
     }
 
@@ -71,7 +71,7 @@ public final class KidsRemote {
     private final KidsDb db;
     private final SharedPreferences devices;
     private final SecureRandom random = new SecureRandom();
-    private final Map<String, Long> sessions = new HashMap<>();
+    private static final Map<String, Long> sessions = new HashMap<>();
     private final ExecutorService workers = Executors.newFixedThreadPool(6);
     private List<AppEntry> apps = new ArrayList<>();
     private long appsAt;
@@ -139,6 +139,8 @@ public final class KidsRemote {
         KidsLanguage.apply(ctx);
         if (r == null) {
             send(out, "400 Bad Request", "text/plain", new byte[0]);
+        } else if (!RemoteText.localRequest(r.host, r.origin)) {
+            send(out, "403 Forbidden", "text/plain", new byte[0]);
         } else if (r.method.equals("GET")) {
             if (r.path.equals("/")) {
                 String page = new String(readAll(ctx.getResources().openRawResource(R.raw.sc_remote)), StandardCharsets.UTF_8);
@@ -192,6 +194,8 @@ public final class KidsRemote {
             String name = line.substring(0, colon).trim().toLowerCase(), value = line.substring(colon + 1).trim();
             if (name.equals("content-length")) length = RemoteText.number(value, 0);
             if (name.equals("x-token")) r.token = value;
+            if (name.equals("host")) r.host = value;
+            if (name.equals("origin")) r.origin = value;
         }
         if (length < 0 || length > MAX_REQUEST) return null;
         byte[] body = new byte[length];
@@ -320,6 +324,14 @@ public final class KidsRemote {
     /** Alle gekoppelten Handys entfernen. */
     public static void forgetDevices(Context ctx) {
         ctx.getSharedPreferences(DEVICES, Context.MODE_PRIVATE).edit().clear().apply();
+        endSessions();
+    }
+
+    /** Beendet alle offenen Anmeldungen, etwa nach einer neuen PIN. */
+    public static void endSessions() {
+        synchronized (sessions) {
+            sessions.clear();
+        }
     }
 
     // ---------- Daten ----------
@@ -460,6 +472,7 @@ public final class KidsRemote {
             case "pin":
                 if (!PinHash.valid(q.get("v"))) return ctx.getString(R.string.sc_err_pin);
                 lock.setPin(q.get("v"));
+                endSessions();
                 return null;
             case "devices":
                 forgetDevices(ctx);

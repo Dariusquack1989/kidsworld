@@ -25,7 +25,9 @@ import android.widget.TextView;
 
 import com.gathin.tvhome.R;
 
+import java.text.DateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -67,6 +69,9 @@ public final class KidsGuard extends AccessibilityService {
 
     /** So oft wird die Nutzungszeit fortgeschrieben; lange Abstände sparen Rechenzeit. */
     private static final long TICK_MS = 30_000;
+
+    /** Läuft der Wächter gerade? Er teilt sich den Prozess mit der Startseite, das ist also der echte Stand. */
+    private static volatile boolean running;
 
     private KidsLock lock;
     private KidsProfiles profiles;
@@ -130,6 +135,15 @@ public final class KidsGuard extends AccessibilityService {
         });
         remote.start();
         settings = KidsLock.settingsPackages(this);
+        running = true;
+        long down = lock.takeGuardDown();
+        if (down > 0) {
+            db.logGuard(getString(R.string.sc_log_guard, DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date(down))));
+        }
+    }
+
+    public static boolean running() {
+        return running;
     }
 
     @Override
@@ -257,6 +271,7 @@ public final class KidsGuard extends AccessibilityService {
 
     @Override
     public void onDestroy() {
+        running = false;
         handler.removeCallbacks(tick);
         if (db != null) unregisterReceiver(screen);
         if (remote != null) remote.stop();

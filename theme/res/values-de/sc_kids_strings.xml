@@ -29,6 +29,7 @@
     <string name="sc_kids_task_done">geschafft</string>
     <string name="sc_kids_task_again">nochmal versuchen</string>
     <string name="sc_kids_time_pill">Noch %1$d Min.</string>
+    <string name="sc_kids_call_parents">Bitte hol deine Eltern.</string>
     <string name="sc_kids_time_over">Zeit ist um</string>
     <string name="sc_kids_credit">Super! +%1$d Minuten: %2$s</string>
 </resources>

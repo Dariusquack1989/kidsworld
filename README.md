@@ -20,7 +20,7 @@ The app follows the TV's language: English, or German on a German TV. A parent c
 | ![Turning apps on and off](media/parent-apps.jpg) | ![Phone page: tasks](media/phone-tasks.jpg) |
 | ![Phone page: screen time](media/phone-time.jpg) | |
 
-The pictures come from the Android TV emulator with sample data. The network address in the parent area is blurred.
+The GIF and the world and task pictures come from a waipu tv stick. The parent area, profile and phone pictures come from the emulator with sample data. Child names and the network address are blurred.
 
 ## What it does
 
@@ -96,7 +96,9 @@ No accounts, telemetry, ads or analytics. Data stays on the TV.
 - This is a hurdle for children, not a guarantee. Android offers an app like this no system-wide lock.
 - The phone page uses plain HTTP. See [SECURITY.md](SECURITY.md).
 - A force-stop in Android's settings turns the guard off, and turning the setting back on is not enough: it runs again
-  after the next reboot or reinstall. The parent area shows the setting, and the phone page stops responding.
+  after the next reboot or reinstall. The parent area shows the real state, counted apps
+  no longer start, the home screen asks for a parent, and the log records it once the guard is back. The phone page
+  stops responding meanwhile.
 - Time counts while a counted app is in front, including a paused video.
 - A clock set back gives no new day. A clock set forward starts a new day, and that day then stays until the real date
   catches up. Settings stay behind the PIN for that reason.
@@ -116,5 +118,4 @@ Remote keys, HDMI and live TV are still being tested with [this sheet](docs/REMO
 ## Licence and credits
 
 MIT, see [LICENSE](LICENSE). Base launcher: [Clean Your TV](https://github.com/Gathin23/cleanyourtv) by Gathin, MIT.
-Fonts: SIL Open Font License, see `FONT-LICENSE-OFL.txt` and `theme/FONT-LICENSE-Baloo2-OFL.txt`. Pictures: made with
-Google Gemini for this project.
+Fonts: SIL Open Font License, see `FONT-LICENSE-OFL.txt` and `theme/FONT-LICENSE-Baloo2-OFL.txt`.

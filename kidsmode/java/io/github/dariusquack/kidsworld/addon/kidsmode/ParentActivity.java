@@ -205,6 +205,7 @@ public final class ParentActivity extends Activity {
             case REPEAT:
                 if (pin.equals(firstPin)) {
                     lock.setPin(pin);
+                    KidsRemote.endSessions();
                     firstPin = null;
                     showMenu();
                     return;
@@ -226,7 +227,7 @@ public final class ParentActivity extends Activity {
         mode = null;
         root.removeAllViews();
         root.addView(text(getString(R.string.sc_parent_title), 30, medium, Color.WHITE));
-        boolean guard = lock.guardEnabled();
+        boolean guard = KidsGuard.running();
         TextView status = text(getString(guard ? R.string.sc_parent_guard_on : R.string.sc_parent_guard_off), 15,
                 regular, guard ? 0xFF7CF5B0 : 0xFFFFB37A);
         status.setPadding(0, dp(6), 0, dp(4));

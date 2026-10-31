@@ -21,7 +21,7 @@ import java.util.List;
  */
 public final class KidsDb extends SQLiteOpenHelper {
     public static final String OPEN = "OFFEN", WAITING = "WARTET", DONE = "BESTAETIGT", REJECTED = "ABGELEHNT";
-    public static final String TASK = "AUFGABE", CORRECTION = "KORREKTUR", CARRY = "UEBERTRAG", CLOCK = "UHR";
+    public static final String TASK = "AUFGABE", CORRECTION = "KORREKTUR", CARRY = "UEBERTRAG", CLOCK = "UHR", GUARD = "WAECHTER";
 
     private static final String PREFS = "sc_kids_clock";
     private static KidsDb instance;
@@ -95,6 +95,11 @@ public final class KidsDb extends SQLiteOpenHelper {
         if (jump != 0) log("", day, 0, CLOCK, app.getString(R.string.sc_log_clock, (int) (jump / 60_000)));
         clock.edit().putLong("wall", wall).putLong("elapsed", elapsed).putInt("day", day).apply();
         return day;
+    }
+
+    /** Vermerkt im Protokoll, dass der Wächter aus war. */
+    public synchronized void logGuard(String note) {
+        log("", today(), 0, GUARD, note);
     }
 
     private void log(String kid, int day, int minutes, String kind, String note) {
@@ -179,7 +184,7 @@ public final class KidsDb extends SQLiteOpenHelper {
                 e.kind = c.getString(4);
                 e.note = c.getString(5);
                 e.time = c.getLong(6);
-                if (e.minutes != 0 || CLOCK.equals(e.kind)) out.add(e);
+                if (e.minutes != 0 || CLOCK.equals(e.kind) || GUARD.equals(e.kind)) out.add(e);
             }
         }
         return out;

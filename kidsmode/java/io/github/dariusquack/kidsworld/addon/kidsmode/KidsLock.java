@@ -25,6 +25,7 @@ public final class KidsLock {
     private static final String PREFS = "sc_kids";
     private static final String KEY_CALM = "calm_motion";
     private static final String KEY_LANGUAGE = "language";
+    private static final String KEY_GUARD_DOWN = "guard_down_since";
     private static final String KEY_SALT = "pin_salt";
     private static final String KEY_HASH = "pin_hash";
     private static final String KEY_FAILS = "pin_fails";
@@ -42,6 +43,18 @@ public final class KidsLock {
     }
 
     /** Ruhige Animationen: weniger Bewegung und keine Überraschungen. */
+    /** Die Startseite merkt sich, seit wann sie den Wächter vermisst; der erste Zeitpunkt bleibt. */
+    public void markGuardDown() {
+        if (!prefs.contains(KEY_GUARD_DOWN)) prefs.edit().putLong(KEY_GUARD_DOWN, System.currentTimeMillis()).apply();
+    }
+
+    /** Ergibt den gemerkten Zeitpunkt und löscht ihn; 0 wenn nichts vorlag. */
+    public long takeGuardDown() {
+        long since = prefs.getLong(KEY_GUARD_DOWN, 0);
+        prefs.edit().remove(KEY_GUARD_DOWN).apply();
+        return since;
+    }
+
     public String language() {
         return prefs.getString(KEY_LANGUAGE, KidsLanguage.AUTO);
     }

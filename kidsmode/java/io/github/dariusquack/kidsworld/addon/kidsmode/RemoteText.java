@@ -41,6 +41,15 @@ final class RemoteText {
         return b.append('"').toString();
     }
 
+    /**
+     * Kommt die Anfrage über die Adresse des TVs im Heimnetz? Ein Hostname deutet auf DNS-Rebinding hin, ein fremdes
+     * Origin auf eine andere Webseite.
+     */
+    static boolean localRequest(String host, String origin) {
+        if (host == null || !host.matches("((\\d{1,3}\\.){3}\\d{1,3}|localhost)(:\\d+)?")) return false;
+        return origin == null || origin.equals("http://" + host);
+    }
+
     static String limited(String s, int max) {
         return s.length() > max ? s.substring(0, max) : s;
     }
