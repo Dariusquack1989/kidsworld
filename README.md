@@ -32,12 +32,36 @@ The pictures come from the Android TV emulator with sample data. The network add
 - A web page for the parent's phone on the home network (port 8686): confirm tasks, change time, see usage, send a
   message to the TV. A phone pairs once with a code shown on the TV.
 
-## Build and install
+## Requirements
 
-You need JDK 17 and the Android SDK.
+- Android TV 8.0 or newer (API 26). Tested only on the devices listed under "Tested on".
+- ADB access to the TV for the first setup.
+- To build: JDK 17 and the Android SDK with platform 34.
+- For the phone page: TV and phone on the same network.
+
+## Project structure
+
+| Folder | What is in it |
+|---|---|
+| `app/` | The Android app and the code of the Clean Your TV launcher it is built on |
+| `theme/` | The children's interface, pictures and fonts |
+| `kidsmode/` | Rules, guard, parent area, database and the phone page |
+| `media/` | Pictures for this page |
+| `docs/` | Test sheet for the remote |
+
+## Build
 
 ```sh
-./gradlew assembleRelease
+./gradlew testDebugUnitTest assembleRelease
+```
+
+The APK is `app/build/outputs/apk/release/app-release.apk`. The repository holds no APK and no signing key. Gradle signs
+the build with your own local debug key, so an update must come from the same machine. For anything you pass on to
+other people, set up your own release key.
+
+## Install
+
+```sh
 adb connect <tv ip>:5555
 adb install -r app/build/outputs/apk/release/app-release.apk
 adb shell cmd package set-home-activity io.github.dariusquack.kidsworld/io.github.dariusquack.kidsworld.HomeActivity
@@ -45,35 +69,52 @@ adb shell settings put secure enabled_accessibility_services io.github.dariusqua
 adb shell settings put secure accessibility_enabled 1
 ```
 
-The accessibility line replaces the list of enabled services. If the TV already has some, keep them, separated by `:`.
-Release builds are signed with the debug key, so build from source and keep the build you installed.
+The accessibility line replaces the list of enabled services. Check the list first with
+`adb shell settings get secure enabled_accessibility_services`. If it has entries, keep them, separated by `:`.
 
-To set it up, hold OK for 5 seconds on the home screen and choose a PIN. The phone address is shown in the parent
-area. Close network ADB when you are done.
+If the TV keeps its own launcher as Home, Kids World does not become the home screen. On some devices the stock launcher
+must be turned off first, which `pm disable-user` can do where the firmware allows it.
 
-## Permissions
+Hold OK for 5 seconds on the home screen and choose a PIN. The phone address is shown in the parent area. Close network
+ADB when you are done.
 
-| Permission | Why |
+To remove it, run `adb uninstall io.github.dariusquack.kidsworld`. This deletes the PIN, tasks and time accounts.
+
+## Permissions and background work
+
+| Item | Why |
 |---|---|
-| `INTERNET` | Serves the parent page on the home network. The app sends nothing to the internet. |
-| `BIND_ACCESSIBILITY_SERVICE` (`KidsGuard`) | Sees which app is in front, sends the TV home for apps that are not allowed, filters a few remote keys, counts screen time and shows messages. It does not read content inside apps. |
-| `ACCESS_NETWORK_STATE`, `ACCESS_WIFI_STATE`, `ACCESS_FINE_LOCATION`, `WRITE_SECURE_SETTINGS` and others | Inherited from the base launcher, see `app/src/main/AndroidManifest.xml`. Read that file before you install. |
+| `INTERNET` | Serves the parent page on the home network, port 8686. The code of this project connects to nothing on the internet. |
+| Accessibility service `KidsGuard` | Sees which app is in front, sends the TV home for apps that are off, filters a few remote keys, counts screen time and shows messages. It does not read content inside apps. |
+| `ACCESS_NETWORK_STATE`, `ACCESS_WIFI_STATE`, `ACCESS_FINE_LOCATION`, `WRITE_SECURE_SETTINGS`, `yandex.tv.permission.ACCESS_TV_SOURCE` | Inherited from the base launcher. `WRITE_SECURE_SETTINGS` works only if you grant it over ADB, and setup does not need it. |
+| Services inherited from the base launcher | `HomeKeyService`, `InputKeyService`, `GuardRevival` and `ClockDream` are in the manifest. They stay inactive unless you turn them on. |
+
+No accounts, telemetry, ads or analytics. Data stays on the TV.
 
 ## Limits
 
-- This is a hurdle for children, not a guarantee. Android offers no system-wide lock to an app like this.
-- The phone page uses plain HTTP. Use it only on a home network you trust.
-- A force-stop in Android's settings turns the guard off, and Android does not restart it. The parent area shows the
-  state, and the phone page stops responding.
+- This is a hurdle for children, not a guarantee. Android offers an app like this no system-wide lock.
+- The phone page uses plain HTTP. See [SECURITY.md](SECURITY.md).
+- A force-stop in Android's settings turns the guard off, and turning the setting back on is not enough: it runs again
+  after the next reboot or reinstall. The parent area shows the setting, and the phone page stops responding.
 - Time counts while a counted app is in front, including a paused video.
-- A clock set forward starts a new day. Settings stay behind the PIN for that reason.
+- A clock set back gives no new day. A clock set forward starts a new day, and that day then stays until the real date
+  catches up. Settings stay behind the PIN for that reason.
+- Removing the app deletes all its data.
 
 ## Tested on
 
-waipu tv stick (SEI700WP), Android 11, and the Android TV 11 emulator. Remote keys, the phone page on a real phone and
-live TV are still being tested.
+- waipu tv stick (SEI700WP), Android 11: installation, cold start, phone page on a real phone, English and German.
+- Android TV 11 emulator.
 
-## Credits
+Remote keys, HDMI and live TV are still being tested with [this sheet](docs/REMOTE_TEST.md).
 
-Base launcher: [Clean Your TV](https://github.com/Gathin23/cleanyourtv) by Gathin, MIT. Fonts: see the licence files.
-Pictures: made with Google Gemini for this project.
+## Version
+
+1.0.0, see [CHANGELOG.md](CHANGELOG.md).
+
+## Licence and credits
+
+MIT, see [LICENSE](LICENSE). Base launcher: [Clean Your TV](https://github.com/Gathin23/cleanyourtv) by Gathin, MIT.
+Fonts: SIL Open Font License, see `FONT-LICENSE-OFL.txt` and `theme/FONT-LICENSE-Baloo2-OFL.txt`. Pictures: made with
+Google Gemini for this project.
