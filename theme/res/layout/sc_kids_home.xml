@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Kids World: Startseite. Die Bühne (KidsView) wird im Code an Position 0 eingefügt; darüber liegen Kopfzeile,
+     Hinweis und der Text, wenn noch keine App freigegeben ist. Die Profilauswahl legt sich im Code darüber. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/scProfileChip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|start"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="22dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="4dp"
+        android:paddingTop="4dp"
+        android:paddingEnd="14dp"
+        android:paddingBottom="4dp">
+
+        <ImageView
+            android:id="@+id/scProfileAvatar"
+            android:layout_width="44dp"
+            android:layout_height="44dp" />
+
+        <TextView
+            android:id="@+id/scProfileName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:fontFamily="@font/baloo2_bold"
+            android:includeFontPadding="false"
+            android:textColor="#FFFFFFFF"
+            android:textSize="17sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="16dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/scWorldTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/baloo2_extrabold"
+            android:includeFontPadding="false"
+            android:shadowColor="#73000000"
+            android:shadowDy="3"
+            android:shadowRadius="9"
+            android:textColor="#FFFFFFFF"
+            android:textSize="32sp" />
+
+        <LinearLayout
+            android:id="@+id/scWorldDots"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal" />
+    </LinearLayout>
+
+    <TextClock
+        android:id="@+id/scClock"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="36dp"
+        android:fontFamily="@font/baloo2_bold"
+        android:includeFontPadding="false"
+        android:shadowColor="#73000000"
+        android:shadowDy="3"
+        android:shadowRadius="9"
+        android:textColor="#FFFFFFFF"
+        android:textSize="30sp" />
+
+    <TextView
+        android:id="@+id/scKidsTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="66dp"
+        android:layout_marginEnd="36dp"
+        android:background="@drawable/sc_kids_pill"
+        android:fontFamily="@font/baloo2_bold"
+        android:includeFontPadding="false"
+        android:paddingStart="14dp"
+        android:paddingTop="5dp"
+        android:paddingEnd="14dp"
+        android:paddingBottom="5dp"
+        android:textColor="#FFFFFFFF"
+        android:textSize="17sp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/scKidsEmpty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="62dp"
+        android:fontFamily="@font/baloo2_bold"
+        android:gravity="center"
+        android:shadowColor="#73000000"
+        android:shadowDy="3"
+        android:shadowRadius="9"
+        android:text="@string/sc_kids_empty"
+        android:textColor="#FFFFFFFF"
+        android:textSize="26sp"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/scKidsToast"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="48dp"
+        android:background="@drawable/sc_kids_pill"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="10dp"
+        android:paddingTop="6dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="6dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/scKidsToastArt"
+            android:layout_width="44dp"
+            android:layout_height="44dp" />
+
+        <TextView
+            android:id="@+id/scKidsToastText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:fontFamily="@font/baloo2_bold"
+            android:textColor="#FFFFFFFF"
+            android:textSize="20sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/scKidsBlock"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#CC120C33"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/scKidsBlockTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/baloo2_extrabold"
+            android:textColor="#FFFFFFFF"
+            android:textSize="44sp" />
+
+        <TextView
+            android:id="@+id/scKidsBlockText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/baloo2_bold"
+            android:textColor="#E6FFFFFF"
+            android:textSize="22sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/scKidsHint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/sc_kids_pill"
+        android:fontFamily="@font/baloo2_bold"
+        android:includeFontPadding="false"
+        android:paddingStart="16dp"
+        android:paddingTop="5dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="5dp"
+        android:text="@string/sc_kids_hint"
+        android:textColor="#FFFFFFFF"
+        android:textSize="14sp" />
+</FrameLayout>

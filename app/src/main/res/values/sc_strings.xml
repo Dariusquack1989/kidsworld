@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Kids World-eigene Texte. Erst Deutsch; Übersetzungen kommen gesammelt am Ende. -->
+<resources>
+    <string name="sc_greeting_morning">Guten Morgen</string>
+    <string name="sc_greeting_day">Guten Tag</string>
+    <string name="sc_greeting_evening">Guten Abend</string>
+    <string name="sc_greeting_night">Gute Nacht</string>
+    <string name="sc_my_apps">Meine Apps</string>
+    <string name="sc_recent_title">Zuletzt geöffnet</string>
+    <string name="sc_recent_empty">Apps, die du über Kids World öffnest, erscheinen hier.</string>
+    <string name="sc_settings">Einstellungen</string>
+    <string name="sc_launch_failed">%1$s lässt sich nicht öffnen.</string>
+    <string name="sc_no_apps">Keine TV-Apps gefunden.</string>
+</resources>

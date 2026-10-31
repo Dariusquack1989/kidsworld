@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KidsWorld Eltern</title>
+<style>
+body{margin:0;background:#14122b;color:#fff;font:16px system-ui,sans-serif}
+main{max-width:560px;margin:0 auto;padding:12px 12px 40px}
+h1{font-size:21px;margin:6px 0 12px}
+h2{font-size:17px;margin:4px 0 8px}
+section{background:#221f42;border-radius:14px;padding:14px;margin-bottom:12px}
+button,select,input,textarea{font:inherit;border-radius:10px;border:0;padding:10px 12px;min-height:44px}
+button{background:#fff;color:#14122b;font-weight:600}
+button.off{background:#3a3660;color:#fff}
+button.danger{background:#ffb37a;color:#14122b}
+input,textarea{background:#3a3660;color:#fff;width:100%;box-sizing:border-box;margin:4px 0 8px}
+input[type=checkbox]{width:24px;min-height:24px;margin:0}
+label{display:block;font-size:14px;color:#d9d6ee}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0}
+.row>span{min-width:0;overflow-wrap:anywhere}
+.check{display:flex;align-items:center;gap:10px;padding:8px 0;color:#fff;font-size:16px}
+.tabs{display:flex;gap:8px;overflow-x:auto;margin-bottom:12px;padding-bottom:4px}
+.tabs button{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.tabs img{width:30px;height:30px}
+.days{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0 8px}
+.days button{padding:6px 8px;min-width:44px}
+.muted{color:#c9c6e0;font-size:14px;margin:4px 0}
+.err{color:#ff9a9a;min-height:22px;margin:4px 0}
+.count{background:#ffb37a;color:#14122b;border-radius:10px;padding:0 7px;font-size:13px}
+</style>
+</head>
+<body>
+<main>
+<h1>KidsWorld Eltern</h1>
+<div id="login"><section>
+<label for="pin">Eltern-PIN</label>
+<input id="pin" type="password" inputmode="numeric" maxlength="4" autocomplete="off">
+<div id="pairBox" hidden><label for="code">Code vom Fernseher</label>
+<input id="code" inputmode="numeric" maxlength="6" autocomplete="off"></div>
+<p class="err" id="err"></p>
+<button id="go">Anmelden</button>
+</section></div>
+<div id="app" hidden></div>
+</main>
+<script>
+var token=null,data=null,current=null,view='confirm',draft='',editing=null;
+var dayNames=['Mo','Di','Mi','Do','Fr','Sa','So'];
+var views=[['confirm','Bestätigen'],['tasks','Aufgaben'],['time','Medienzeit'],['usage','Nutzung'],['kids','Kinder'],['tv','TV']];
+var statusText={OFFEN:'offen',WARTET:'wartet auf Bestätigung',BESTAETIGT:'bestätigt',ABGELEHNT:'abgelehnt'};
+var kindText={AUFGABE:'Aufgabe',KORREKTUR:'Korrektur',UEBERTRAG:'Übertrag',UHR:'Uhr'};
+function el(t,a,c){var e=document.createElement(t);for(var k in a||{}){if(k=='on')e.onclick=a[k];else if(k=='text')e.textContent=a[k];else if(k=='value')e.value=a[k];else if(k=='checked')e.checked=a[k];else e.setAttribute(k,a[k]);}(c||[]).forEach(function(x){if(x)e.appendChild(x)});return e;}
+function form(p){return Object.keys(p||{}).map(function(k){return encodeURIComponent(k)+'='+encodeURIComponent(p[k])}).join('&');}
+function post(path,params){var h={'Content-Type':'application/x-www-form-urlencoded'};if(token)h['X-Token']=token;
+return fetch(path,{method:'POST',headers:h,body:form(params)}).then(function(r){if(r.status==401&&token){location.reload();}return r.json()});}
+var lost=null;
+function net(ok){if(!lost){lost=el('div',{text:'Keine Verbindung zum TV: TV aus, WLAN weg oder Wächter nicht aktiv. Die Anzeige ist nicht aktuell.',style:'position:sticky;top:0;z-index:9;padding:12px;background:#b0413e;color:#fff;font-weight:600;text-align:center'});document.body.insertBefore(lost,document.body.firstChild);}lost.hidden=ok;}
+function act(params){return post('/api/do',params).then(function(d){net(true);if(d.error){alert(d.error);return;}data=d;render();},function(){net(false);alert('Keine Verbindung zum TV. Bitte später prüfen, ob es gespeichert wurde.');});}
+function busy(){var e=document.activeElement;return e&&(e.tagName=='INPUT'||e.tagName=='TEXTAREA');}
+function refresh(){post('/api/state').then(function(d){net(true);if(d.error)return;var first=!data;data=d;if(!current)current=d.active;if(first||(!editing&&!busy()))render();},function(){net(false);});}
+function loginError(e){document.getElementById('err').textContent=e=='locked'?'Zu viele Versuche. Bitte eine Minute warten.':e=='nopin'?'Bitte zuerst am TV eine PIN festlegen.':e=='code'?'Falscher Code':'Falsche PIN';}
+function enter(t){token=t;document.getElementById('login').hidden=true;document.getElementById('app').hidden=false;refresh();setInterval(refresh,15000);}
+var pairing=false;
+document.getElementById('go').onclick=function(){
+var pin=document.getElementById('pin').value;
+if(pairing){post('/api/pair',{pin:pin,code:document.getElementById('code').value}).then(function(d){
+if(d.token){localStorage.setItem('device',d.device);enter(d.token);}else loginError(d.error);});return;}
+post('/api/login',{pin:pin,device:localStorage.getItem('device')||''}).then(function(d){
+if(d.token)enter(d.token);
+else if(d.pair){pairing=true;document.getElementById('pairBox').hidden=false;document.getElementById('err').textContent='Dieses Handy ist neu: Bitte den Code vom Fernseher eingeben.';}
+else loginError(d.error);});};
+function pad(n){return (n<10?'0':'')+n}
+function clock(m){return m<0?'':pad(Math.floor(m/60))+':'+pad(m%60)}
+function minutes(t){var p=t.split(':');return p.length==2?(+p[0])*60+(+p[1]):-1}
+function dayToDate(d){return d?new Date(d*864e5).toISOString().slice(0,10):''}
+function dateToDay(s){return s?Math.floor(Date.parse(s+'T00:00:00Z')/864e5):0}
+function kid(){return data.children.filter(function(x){return x.id==current})[0]||data.children[0]}
+function kidTabs(){var tabs=el('div',{'class':'tabs'});
+data.children.forEach(function(c){tabs.appendChild(el('button',{'class':c.id==kid().id?'':'off',on:function(){current=c.id;editing=null;render();}},[el('img',{src:'/art/avatare/avatar_'+c.avatar+'.png',alt:''}),el('span',{text:c.name})]));});return tabs;}
+function render(){
+var root=document.getElementById('app');root.textContent='';
+var nav=el('div',{'class':'tabs'});
+views.forEach(function(v){var b=el('button',{'class':view==v[0]?'':'off',on:function(){view=v[0];editing=null;render();}},[el('span',{text:v[1]})]);
+if(v[0]=='confirm'&&data.pending.length)b.appendChild(el('span',{'class':'count',text:data.pending.length}));nav.appendChild(b);});
+root.appendChild(nav);
+({confirm:vConfirm,tasks:vTasks,time:vTime,usage:vUsage,kids:vKids,tv:vTv})[view](root);
+}
+function vConfirm(root){
+if(!data.pending.length){root.appendChild(el('section',{},[el('p',{'class':'muted',text:'Keine offenen Bestätigungen.'})]));return;}
+data.pending.forEach(function(p){var why=el('input',{placeholder:'Begründung (freiwillig)','aria-label':'Begründung'});
+root.appendChild(el('section',{},[el('div',{'class':'row'},[el('img',{src:'/art/avatare/avatar_'+p.avatar+'.png',alt:'',width:'40',height:'40'}),el('span',{text:p.kid+': '+p.title}),el('strong',{text:'+'+p.minutes+' Min.'})]),why,
+el('div',{'class':'row'},[el('button',{text:'Bestätigen',on:function(){act({a:'confirm',run:p.run})}}),el('button',{'class':'off',text:'Ablehnen',on:function(){act({a:'reject',run:p.run,reason:why.value})}})])]));});
+}
+function repeatText(t){if(!t.days)return 'einmalig';if(t.days==127)return 'täglich';return dayNames.filter(function(n,i){return t.days&(1<<i)}).join(', ');}
+function vTasks(root){
+root.appendChild(kidTabs());var c=kid();
+if(editing){taskForm(root,c);return;}
+root.appendChild(el('p',{},[el('button',{text:'Neue Aufgabe',on:function(){editing={id:0,title:'',desc:'',minutes:15,days:0,until:0,confirm:true};render();}})]));
+if(!c.tasks.length)root.appendChild(el('section',{},[el('p',{'class':'muted',text:'Noch keine Aufgaben.'})]));
+c.tasks.forEach(function(t){root.appendChild(el('section',{},[el('strong',{text:t.title}),
+el('p',{'class':'muted',text:'+'+t.minutes+' Min. · '+repeatText(t)+' · '+(t.today?statusText[t.status]:'heute nicht dran')+(t.confirm?'':' · ohne Bestätigung')}),
+t.desc?el('p',{'class':'muted',text:t.desc}):null,t.reason?el('p',{'class':'muted',text:'Begründung: '+t.reason}):null,
+el('div',{'class':'row'},[el('button',{'class':'off',text:'Bearbeiten',on:function(){editing=t;render();}}),el('button',{'class':'off',text:'Löschen',on:function(){if(confirm('Aufgabe löschen?'))act({a:'taskdel',task:t.id})}})])]));});
+}
+function taskForm(root,c){var t=editing,days=t.days;
+var title=el('input',{value:t.title,maxlength:'60',id:'tt'}),desc=el('textarea',{rows:'2',maxlength:'200',id:'td'}),mins=el('input',{type:'number',min:'0',max:'240',value:t.minutes,id:'tm'}),
+until=el('input',{type:'date',value:dayToDate(t.until),id:'tu'}),conf=el('input',{type:'checkbox',checked:t.confirm,id:'tc'});desc.value=t.desc;
+var row=el('div',{'class':'days'});function paint(){row.textContent='';dayNames.forEach(function(n,i){row.appendChild(el('button',{'class':days&(1<<i)?'':'off',text:n,on:function(){days^=1<<i;paint();}}));});}paint();
+root.appendChild(el('section',{},[el('h2',{text:t.id?'Aufgabe bearbeiten':'Neue Aufgabe für '+c.name}),
+el('label',{'for':'tt',text:'Name'}),title,el('label',{'for':'td',text:'Beschreibung'}),desc,
+el('label',{'for':'tm',text:'Zusätzliche Minuten'}),mins,
+el('label',{text:'Wiederholung (kein Tag gewählt = einmalig)'}),row,
+el('label',{'for':'tu',text:'Gültig bis (leer = unbegrenzt)'}),until,
+el('label',{'class':'check'},[conf,el('span',{text:'Elternbestätigung nötig'})]),
+el('p',{'class':'muted',text:'Ohne Bestätigung bekommt das Kind die Minuten sofort beim Melden.'}),
+el('div',{'class':'row'},[el('button',{text:'Speichern',on:function(){editing=null;act({a:'task',id:c.id,task:t.id,title:title.value,desc:desc.value,minutes:mins.value||0,days:days,until:dateToDay(until.value),confirm:conf.checked?1:0});}}),
+el('button',{'class':'off',text:'Abbrechen',on:function(){editing=null;render();}})])]));
+}
+function num(id,label,value){return [el('label',{'for':id,text:label}),el('input',{id:id,type:'number',min:'0',max:'1440',value:value})];}
+function vTime(root){
+root.appendChild(kidTabs());var c=kid();
+var on=el('input',{type:'checkbox',checked:c.timeOn}),carry=el('input',{type:'checkbox',checked:c.carry});
+var from=el('input',{type:'time',id:'af',value:clock(c.bedTo)}),to=el('input',{type:'time',id:'at',value:clock(c.bedFrom)});
+root.appendChild(el('section',{},[el('h2',{text:'Heute'}),el('p',{'class':'muted',text:c.timeOn?('Verfügbar '+c.available+' Min., genutzt '+c.usedMin+' Min., noch '+c.left+' Min., heute verdient '+c.extra+' Min.'):'Kein Zeitkonto: Medienzeit ist unbegrenzt. Genutzt: '+c.usedMin+' Min.'})]));
+var fields=[].concat(num('b','Grundzeit pro Tag (Minuten)',c.base),num('e','Maximale Zusatzzeit (0 = keine Grenze)',c.maxExtra),num('t','Maximale Tageszeit (0 = keine Grenze)',c.maxTotal));
+root.appendChild(el('section',{},[el('h2',{text:'Medienzeitkonto'}),el('label',{'class':'check'},[on,el('span',{text:'Zeitkonto ein'})])].concat(fields,[
+el('label',{'class':'check'},[carry,el('span',{text:'Ungenutzte Zusatzminuten mitnehmen'})]),
+el('p',{},[el('button',{text:'Speichern',on:function(){act({a:'time',id:c.id,on:on.checked?1:0,carry:carry.checked?1:0,base:fields[1].value||0,extra:fields[3].value||0,total:fields[5].value||0})}})])])));
+root.appendChild(el('section',{},[el('h2',{text:'Mediennutzung erlaubt'}),el('label',{'for':'af',text:'Von'}),from,el('label',{'for':'at',text:'Bis'}),to,
+el('div',{'class':'row'},[el('button',{text:'Speichern',on:function(){if(from.value&&to.value)act({a:'bed',id:c.id,from:minutes(to.value),to:minutes(from.value)})}}),el('button',{'class':'off',text:'Immer erlaubt',on:function(){act({a:'bed',id:c.id,from:-1,to:-1})}})])]));
+var amount=el('input',{type:'number',id:'cm',placeholder:'Minuten, zum Beispiel 15 oder -10'}),note=el('input',{id:'cn',maxlength:'60',placeholder:'Grund'});
+root.appendChild(el('section',{},[el('h2',{text:'Zeit korrigieren'}),el('p',{'class':'muted',text:'Das Tagesmaximum gilt auch hier.'}),el('label',{'for':'cm',text:'Minuten'}),amount,el('label',{'for':'cn',text:'Grund'}),note,
+el('p',{},[el('button',{text:'Buchen',on:function(){if(amount.value)act({a:'correct',id:c.id,v:amount.value,note:note.value||'Korrektur'})}})])]));
+var list=el('section',{},[el('h2',{text:'Apps'}),el('p',{'class':'muted',text:'Links: gesperrt, frei, Favorit. Rechts: ob die App Medienzeit kostet.'})]);
+c.apps.forEach(function(a){list.appendChild(el('div',{'class':'row'},[el('span',{text:a.label}),el('div',{},[
+el('button',{'class':a.state=='off'?'off':'',text:a.state=='fav'?'Favorit':a.state=='on'?'frei':'gesperrt',on:function(){act({a:'app',id:c.id,pkg:a.pkg})}}),el('span',{text:' '}),
+el('button',{'class':'off',text:a.free?'kostenlos':'zählt',on:function(){act({a:'free',id:c.id,pkg:a.pkg})}})])]));});
+root.appendChild(list);
+}
+function vUsage(root){
+root.appendChild(kidTabs());var c=kid();
+var s=el('section',{},[el('h2',{text:'Letzte 7 Tage'})]);
+c.days.forEach(function(m,i){s.appendChild(el('div',{'class':'row'},[el('span',{text:i==0?'Heute':i==1?'Gestern':'Vor '+i+' Tagen'}),el('strong',{text:m+' Min.'})]));});
+root.appendChild(s);
+var l=el('section',{},[el('h2',{text:'Protokoll'})]);
+if(!data.log.length)l.appendChild(el('p',{'class':'muted',text:'Noch keine Einträge.'}));
+data.log.forEach(function(e){l.appendChild(el('div',{'class':'row'},[el('span',{text:new Date(e.time).toLocaleString('de-DE',{dateStyle:'short',timeStyle:'short'})+' · '+(e.kid?e.kid+' · ':'')+kindText[e.kind]+': '+e.note}),el('strong',{text:e.kind=='UHR'?'':(e.minutes>0?'+':'')+e.minutes})]));});
+root.appendChild(l);
+}
+function vKids(root){
+root.appendChild(kidTabs());var c=kid();
+var name=el('input',{value:c.name,maxlength:'20','aria-label':'Name'});
+root.appendChild(el('section',{},[el('h2',{text:'Kind'}),name,
+el('div',{'class':'row'},[el('button',{text:'Name speichern',on:function(){act({a:'name',id:c.id,name:name.value})}}),el('button',{'class':'off',text:'Avatar wechseln',on:function(){act({a:'avatar',id:c.id})}})]),
+data.children.length>1?el('p',{},[el('button',{'class':'danger',text:'Profil löschen',on:function(){if(confirm(c.name+' wirklich löschen?')){current=null;act({a:'delete',id:c.id})}}})]):null]));
+var n=el('input',{maxlength:'20',placeholder:'Name','aria-label':'Name des neuen Kindes'});
+root.appendChild(el('section',{},[el('h2',{text:'Neues Kind'}),n,el('p',{},[el('button',{text:'Anlegen',on:function(){if(n.value.trim())act({a:'add',name:n.value})}})])]));
+}
+function toggle(label,on,a){return el('div',{'class':'row'},[el('span',{text:label}),el('button',{'class':on?'':'off',text:on?'an':'aus',on:function(){act({a:a,v:on?0:1})}})]);}
+function vTv(root){
+root.appendChild(el('section',{},[el('div',{'class':'row'},[el('strong',{text:data.locked?'TV ist gesperrt':'TV ist frei'}),
+el('button',{'class':'danger',text:data.locked?'Entsperren':'Jetzt sperren',on:function(){act({a:'lock',v:data.locked?0:1})}})])]));
+var box=el('textarea',{maxlength:'200',rows:'3',placeholder:'Zum Beispiel: Essen ist fertig!','aria-label':'Nachricht'});box.value=draft;box.oninput=function(){draft=box.value};
+root.appendChild(el('section',{},[el('h2',{text:'Nachricht an den TV'}),box,
+el('p',{},[el('button',{text:'Senden',on:function(){if(box.value.trim()){var t=box.value;draft='';act({a:'msg',text:t});}}})])]));
+var pin=el('input',{type:'password',inputmode:'numeric',maxlength:'4',placeholder:'Neue PIN, 4 Ziffern',autocomplete:'off','aria-label':'Neue PIN'});
+root.appendChild(el('section',{},[el('h2',{text:'Einstellungen'}),toggle('Ruhige Animationen',data.calm,'calm'),
+el('div',{'class':'row'},[el('span',{text:'TV-Einstellungen (10 Minuten ohne Wächter)'}),el('button',{'class':'off',text:'Öffnen',on:function(){act({a:'settings'})}})]),
+el('label',{text:'PIN ändern'}),pin,el('p',{},[el('button',{text:'PIN speichern',on:function(){if(/^\d{4}$/.test(pin.value)){act({a:'pin',v:pin.value});}else alert('Bitte 4 Ziffern eingeben');}})]),
+el('div',{'class':'row'},[el('span',{text:'Gekoppelte Handys: '+data.devices}),el('button',{'class':'off',text:'Alle entfernen',on:function(){if(confirm('Alle Handys entfernen? Sie müssen sich neu koppeln.'))act({a:'devices'})}})])]));
+}
+</script>
+</body>
+</html>

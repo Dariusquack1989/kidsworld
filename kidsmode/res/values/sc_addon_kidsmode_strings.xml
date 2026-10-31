@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Add-on Kids Mode. Nur Deutsch; Übersetzungen kommen zum Schluss. -->
+<resources>
+    <string name="sc_kids_guard_name">Kids World Wächter</string>
+    <string name="sc_kids_guard_description">Hält Kinder in Kids World: sperrt die Einstellungs-Taste und schließt Apps, die nicht freigegeben sind. Liest keine Bildschirminhalte.</string>
+    <string name="sc_parent_title">Elternbereich</string>
+    <string name="sc_parent_pin_enter">PIN eingeben</string>
+    <string name="sc_parent_pin_new">Neue PIN festlegen (4 Ziffern)</string>
+    <string name="sc_parent_pin_repeat">PIN wiederholen</string>
+    <string name="sc_parent_pin_wrong">Falsche PIN</string>
+    <string name="sc_parent_pin_mismatch">Die PINs stimmen nicht überein</string>
+    <string name="sc_parent_pin_locked">Zu viele Versuche. Bitte %1$d Sekunden warten.</string>
+    <string name="sc_parent_apps">Apps freigeben</string>
+    <string name="sc_parent_apps_hint">OK schaltet eine App frei oder sperrt sie.</string>
+    <string name="sc_parent_allowed">frei</string>
+    <string name="sc_parent_blocked">gesperrt</string>
+    <string name="sc_parent_settings">Einstellungen öffnen (10 Minuten ohne Wächter)</string>
+    <string name="sc_parent_change_pin">PIN ändern</string>
+    <string name="sc_parent_done">Fertig</string>
+    <string name="sc_parent_guard_on">Wächter: eingeschaltet</string>
+    <string name="sc_parent_guard_off">Wächter: AUS. Ohne ihn sind Einstellungs-Taste und andere Apps nicht gesperrt.</string>
+    <string name="sc_parent_delete">Löschen</string>
+    <string name="sc_parent_children">Kinder</string>
+    <string name="sc_parent_new_child">Neues Kind</string>
+    <string name="sc_parent_child_name">Name des Kindes</string>
+    <string name="sc_parent_child_apps">Apps auswählen</string>
+    <string name="sc_parent_child_avatar">Avatar wechseln</string>
+    <string name="sc_parent_child_delete">Profil löschen</string>
+    <string name="sc_parent_favorite">Favorit</string>
+    <string name="sc_parent_apps_hint3">OK wechselt: gesperrt, frei, Favorit.</string>
+    <string name="sc_parent_calm_on">Ruhige Animationen: an</string>
+    <string name="sc_parent_calm_off">Ruhige Animationen: aus</string>
+    <string name="sc_parent_limit">Grundzeit: %1$d Minuten</string>
+    <string name="sc_parent_limit_off">Zeitkonto: aus</string>
+    <string name="sc_parent_bed">Schlafenszeit: %1$02d:%2$02d bis %3$02d:%4$02d</string>
+    <string name="sc_parent_bed_off">Schlafenszeit: aus</string>
+    <string name="sc_parent_bonus">Heute 30 Minuten dazu</string>
+    <string name="sc_parent_used">Heute genutzt: %1$d Minuten</string>
+    <string name="sc_parent_phone">Handy-Steuerung im selben WLAN: %1$s</string>
+    <string name="sc_parent_phone_off">Handy-Steuerung: braucht Wächter und WLAN</string>
+    <string name="sc_message_title">Nachricht</string>
+    <string name="sc_message_hint">OK drücken zum Schließen</string>
+    <string name="sc_parent_pending">Bestätigungen (%1$d)</string>
+    <string name="sc_parent_title_pending">Bestätigungen</string>
+    <string name="sc_parent_confirm_task">Bestätigen: %1$s</string>
+    <string name="sc_parent_reject_task">Ablehnen</string>
+    <string name="sc_parent_forget_phones">Gekoppelte Handys entfernen</string>
+    <string name="sc_remote_pair_code">Handy koppeln: Code %1$s</string>
+</resources>
