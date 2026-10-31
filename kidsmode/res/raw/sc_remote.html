@@ -53,7 +53,7 @@ document.documentElement.lang=lang;document.title=t('KidsWorld Eltern');['hd','l
 var views=[['confirm','Bestätigen'],['tasks','Aufgaben'],['time','Medienzeit'],['usage','Nutzung'],['kids','Kinder'],['tv','TV']];
 var statusText={OFFEN:'offen',WARTET:'wartet auf Bestätigung',BESTAETIGT:'bestätigt',ABGELEHNT:'abgelehnt'};
 var kindText={AUFGABE:'Aufgabe',KORREKTUR:'Korrektur',UEBERTRAG:'Übertrag',UHR:'Uhr'};
-function el(t,a,c){var e=document.createElement(t);for(var k in a||{}){if(k=='on')e.onclick=a[k];else if(k=='text')e.textContent=t(a[k]);else if(k=='raw')e.textContent=a[k];else if(k=='placeholder'||k=='aria-label')e.setAttribute(k,t(a[k]));else if(k=='value')e.value=a[k];else if(k=='checked')e.checked=a[k];else e.setAttribute(k,a[k]);}(c||[]).forEach(function(x){if(x)e.appendChild(x)});return e;}
+function el(tag,a,c){var e=document.createElement(tag);for(var k in a||{}){if(k=='on')e.onclick=a[k];else if(k=='text')e.textContent=t(a[k]);else if(k=='raw')e.textContent=a[k];else if(k=='placeholder'||k=='aria-label')e.setAttribute(k,t(a[k]));else if(k=='value')e.value=a[k];else if(k=='checked')e.checked=a[k];else e.setAttribute(k,a[k]);}(c||[]).forEach(function(x){if(x)e.appendChild(x)});return e;}
 function form(p){return Object.keys(p||{}).map(function(k){return encodeURIComponent(k)+'='+encodeURIComponent(p[k])}).join('&');}
 function post(path,params){var h={'Content-Type':'application/x-www-form-urlencoded'};if(token)h['X-Token']=token;
 return fetch(path,{method:'POST',headers:h,body:form(params)}).then(function(r){if(r.status==401&&token){location.reload();}return r.json()});}
