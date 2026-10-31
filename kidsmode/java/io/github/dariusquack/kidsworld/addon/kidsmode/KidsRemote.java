@@ -558,7 +558,7 @@ public final class KidsRemote {
         return null;
     }
 
-    /** Adresse für den Elternbereich, zum Beispiel http://192.168.178.40:8686; null ohne Netz. */
+    /** Adresse für den Elternbereich, zum Beispiel http://192.168.1.50:8686; null ohne Netz. */
     public static String address() {
         try {
             for (NetworkInterface n : Collections.list(NetworkInterface.getNetworkInterfaces())) {
