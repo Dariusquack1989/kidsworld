@@ -100,6 +100,8 @@ No accounts, telemetry, ads or analytics. Data stays on the TV.
   no longer start, the home screen asks for a parent, and the log records it once the guard is back. The phone page
   stops responding meanwhile.
 - Time counts while a counted app is in front, including a paused video.
+- The stick cannot always tell that the TV is off. Without HDMI-CEC it stays awake, the app keeps playing and the time
+  keeps counting when only the TV is switched off.
 - A clock set back gives no new day. A clock set forward starts a new day, and that day then stays until the real date
   catches up. Settings stay behind the PIN for that reason.
 - Removing the app deletes all its data.
