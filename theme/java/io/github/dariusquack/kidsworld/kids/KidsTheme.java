@@ -278,12 +278,8 @@ public final class KidsTheme implements HomeTheme {
     /** Zeigt das aktive Profil: Avatar und Name, seine Welt, seine Apps. */
     private void applyProfile() {
         KidsProfile p = profiles.active();
-        boolean several = profiles.list().size() > 1;
-        chip.setVisibility(several ? View.VISIBLE : View.GONE);
-        if (several) {
-            avatar.setImageBitmap(KidsArt.avatar(host, p));
-            profileName.setText(p.name);
-        }
+        avatar.setImageBitmap(KidsArt.avatar(host, p));
+        profileName.setText(p.name);
         shownProfile = stateKey();
         seenCredit = -1;
         World w = World.named(p.world);
@@ -335,13 +331,21 @@ public final class KidsTheme implements HomeTheme {
 
     @Override
     public void onBackPressed() {
-        if (picker != null || blocked()) return;
+        if (blocked()) return;
+        if (picker != null) {
+            // Zurück schließt die Auswahl, außer ein Kind muss erst gewählt werden.
+            if (!profiles.needsPick()) {
+                closePicker();
+                stage.requestFocus();
+            }
+            return;
+        }
         if (taskView != null) {
             closeTasks();
             return;
         }
-        // Zurück: erst zur ersten App, von dort zur Profilauswahl, wenn es mehrere Kinder gibt.
-        if (stage.selected() == 0 && profiles.list().size() > 1) showPicker();
+        // Zurück: erst zur ersten App, von dort zur Profilauswahl.
+        if (stage.selected() == 0) showPicker();
         else stage.goHome();
     }
 
