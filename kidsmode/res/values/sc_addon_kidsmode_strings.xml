@@ -10,10 +10,12 @@
     <string name="sc_parent_pin_wrong">Falsche PIN</string>
     <string name="sc_parent_pin_mismatch">Die PINs stimmen nicht überein</string>
     <string name="sc_parent_pin_locked">Zu viele Versuche. Bitte %1$d Sekunden warten.</string>
-    <string name="sc_parent_apps">Apps freigeben</string>
+    <string name="sc_parent_apps">Apps</string>
+    <string name="sc_parent_menu_apps">Apps aktivieren und deaktivieren</string>
+    <string name="sc_parent_free">kostenlos</string>
     <string name="sc_parent_apps_hint">OK schaltet eine App frei oder sperrt sie.</string>
-    <string name="sc_parent_allowed">frei</string>
-    <string name="sc_parent_blocked">gesperrt</string>
+    <string name="sc_parent_allowed">aktiv</string>
+    <string name="sc_parent_blocked">deaktiviert</string>
     <string name="sc_parent_settings">Einstellungen öffnen (10 Minuten ohne Wächter)</string>
     <string name="sc_parent_change_pin">PIN ändern</string>
     <string name="sc_parent_done">Fertig</string>
@@ -27,7 +29,7 @@
     <string name="sc_parent_child_avatar">Avatar wechseln</string>
     <string name="sc_parent_child_delete">Profil löschen</string>
     <string name="sc_parent_favorite">Favorit</string>
-    <string name="sc_parent_apps_hint3">OK wechselt: gesperrt, frei, Favorit.</string>
+    <string name="sc_parent_apps_hint3">OK: aktivieren oder deaktivieren  ·  ▶ Favorit  ·  ◀ kostenlos (ohne Medienzeit)</string>
     <string name="sc_parent_calm_on">Ruhige Animationen: an</string>
     <string name="sc_parent_calm_off">Ruhige Animationen: aus</string>
     <string name="sc_parent_limit">Grundzeit: %1$d Minuten</string>

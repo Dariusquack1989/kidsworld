@@ -66,14 +66,15 @@ public final class ParentActivity extends Activity {
         root.setOrientation(LinearLayout.VERTICAL);
         root.setMinimumHeight(getResources().getDisplayMetrics().heightPixels);
         root.setGravity(Gravity.CENTER_HORIZONTAL);
-        root.setBackgroundColor(0xFF14122B);
-        android.graphics.Bitmap back = KidsArt.load(this, "hintergruende/hintergrund_elternbereich.jpg", 1);
-        if (back != null) root.setBackground(new android.graphics.drawable.LayerDrawable(new android.graphics.drawable.Drawable[]{
-                new android.graphics.drawable.BitmapDrawable(getResources(), back),
-                new android.graphics.drawable.ColorDrawable(0xB314122B)}));
         root.setPadding(dp(64), dp(40), dp(64), dp(32));
         ScrollView page = new ScrollView(this);
         page.setFillViewport(true);
+        // Das Bild gehört zur Seite, nicht zum Inhalt: Es bleibt stehen, wenn lange Menüs scrollen.
+        page.setBackgroundColor(0xFF14122B);
+        android.graphics.Bitmap back = KidsArt.load(this, "hintergruende/hintergrund_elternbereich.jpg", 1);
+        if (back != null) page.setBackground(new android.graphics.drawable.LayerDrawable(new android.graphics.drawable.Drawable[]{
+                new android.graphics.drawable.BitmapDrawable(getResources(), back),
+                new android.graphics.drawable.ColorDrawable(0xB314122B)}));
         page.addView(root);
         setContentView(page);
         showPin(lock.hasPin() ? Mode.CHECK : Mode.NEW);
@@ -235,6 +236,7 @@ public final class ParentActivity extends Activity {
 
         int waiting = db.waiting().size();
         View first = addButton(getString(R.string.sc_parent_pending, waiting), v -> showPending());
+        menuButton(R.string.sc_parent_menu_apps, v -> showAppChildren());
         menuButton(R.string.sc_parent_children, v -> showChildren());
         menuButton(lock.calmMotion() ? R.string.sc_parent_calm_on : R.string.sc_parent_calm_off, v -> {
             lock.setCalmMotion(!lock.calmMotion());
@@ -297,6 +299,24 @@ public final class ParentActivity extends Activity {
         if (first != null) first.requestFocus();
     }
 
+    /** Direkter Weg zu den Apps: Bei einem Kind sofort die Liste, sonst erst das Kind wählen. */
+    private void showAppChildren() {
+        List<KidsProfile> kids = profiles.list();
+        if (kids.size() == 1) {
+            showApps(kids.get(0).id, this::showMenu);
+            return;
+        }
+        root.removeAllViews();
+        root.addView(text(getString(R.string.sc_parent_menu_apps), 30, medium, Color.WHITE));
+        View first = null;
+        for (KidsProfile p : kids) {
+            View b = addButton(p.name, v -> showApps(p.id, this::showAppChildren));
+            if (first == null) first = b;
+        }
+        addButton(getString(R.string.sc_parent_done), v -> showMenu());
+        first.requestFocus();
+    }
+
     private void askName() {
         EditText name = new EditText(this);
         name.setSingleLine(true);
@@ -326,7 +346,7 @@ public final class ParentActivity extends Activity {
         root.addView(face, new LinearLayout.LayoutParams(dp(84), dp(84)));
         root.addView(text(p.name, 26, medium, Color.WHITE));
         root.addView(text(getString(R.string.sc_parent_used, (int) (db.account(p).usedMs / 60_000)), 14, regular, 0xCCFFFFFF));
-        View first = addButton(getString(R.string.sc_parent_child_apps), v -> showApps(p.id));
+        View first = addButton(getString(R.string.sc_parent_child_apps), v -> showApps(p.id, () -> showChild(p.id)));
         addButton(getString(R.string.sc_parent_child_avatar), v -> {
             KidsProfile c = child(p.id);
             c.avatar = (c.avatar + 1) % KidsProfile.AVATARS.length;
@@ -395,7 +415,7 @@ public final class ParentActivity extends Activity {
 
     // ---------- Apps eines Kindes ----------
 
-    private void showApps(String id) {
+    private void showApps(String id, Runnable back) {
         root.removeAllViews();
         root.addView(text(child(id).name + ": " + getString(R.string.sc_parent_apps), 30, medium, Color.WHITE));
         TextView hint = text(getString(R.string.sc_parent_apps_hint3), 15, regular, 0xB3FFFFFF);
@@ -407,7 +427,7 @@ public final class ParentActivity extends Activity {
         scroll.addView(list);
         root.addView(scroll, new LinearLayout.LayoutParams(dp(620), dp(330)));
         TextView done = button(getString(R.string.sc_parent_done), 20);
-        done.setOnClickListener(v -> showChild(id));
+        done.setOnClickListener(v -> back.run());
         LinearLayout.LayoutParams dlp = new LinearLayout.LayoutParams(dp(300), dp(56));
         dlp.topMargin = dp(12);
         root.addView(done, dlp);
@@ -447,23 +467,34 @@ public final class ParentActivity extends Activity {
             KidsProfile p = child(id);
             boolean f = row.isFocused(), on = p.allowed.contains(app.pkg), fav = p.favorites.contains(app.pkg);
             name.setTextColor(f ? 0xFF14122B : Color.WHITE);
-            state.setText(fav ? R.string.sc_parent_favorite : on ? R.string.sc_parent_allowed : R.string.sc_parent_blocked);
+            String label = getString(on ? R.string.sc_parent_allowed : R.string.sc_parent_blocked);
+            if (fav) label += " · " + getString(R.string.sc_parent_favorite);
+            if (p.free.contains(app.pkg)) label += " · " + getString(R.string.sc_parent_free);
+            state.setText(label);
             state.setTextColor(on ? (f ? 0xFF0E8A4F : 0xFF7CF5B0) : (f ? 0xFFB0413E : 0xFFFF8A8A));
         };
         row.setOnFocusChangeListener((v, f) -> paint.run());
         row.setOnClickListener(v -> {
-            // Gesperrt, frei, Favorit, wieder gesperrt.
             KidsProfile p = child(id);
-            if (!p.allowed.contains(app.pkg)) {
-                p.allowed.add(app.pkg);
-            } else if (!p.favorites.contains(app.pkg)) {
-                p.favorites.add(app.pkg);
-            } else {
-                p.allowed.remove(app.pkg);
-                p.favorites.remove(app.pkg);
-            }
+            if (p.allowed.remove(app.pkg)) p.favorites.remove(app.pkg);
+            else p.allowed.add(app.pkg);
             profiles.save(p);
             paint.run();
+        });
+        row.setOnKeyListener((v, code, event) -> {
+            if (code != KeyEvent.KEYCODE_DPAD_RIGHT && code != KeyEvent.KEYCODE_DPAD_LEFT) return false;
+            if (event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0) {
+                KidsProfile p = child(id);
+                if (code == KeyEvent.KEYCODE_DPAD_LEFT) {
+                    if (!p.free.remove(app.pkg)) p.free.add(app.pkg);
+                } else if (!p.favorites.remove(app.pkg)) {
+                    p.favorites.add(app.pkg);
+                    p.allowed.add(app.pkg);
+                }
+                profiles.save(p);
+                paint.run();
+            }
+            return true;
         });
         paint.run();
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, dp(60));
