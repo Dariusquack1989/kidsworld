@@ -7,6 +7,8 @@
 - Copy a day to other days, or a week to another child.
 - Paired devices are listed and can be renamed or removed one by one.
 - The phone page can be added to the phone's home screen.
+- The device list shows each phone's last IP address.
+- FAQ for common problems.
 
 ## 1.0.0
 

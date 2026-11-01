@@ -9,6 +9,8 @@ confirms it on the phone, and the minutes are added.
 
 The app follows the TV's language: English, or German on a German TV. A parent can also fix the language in the parent area.
 
+Questions and problems: see the [FAQ](docs/FAQ.md).
+
 ## Screenshots
 
 | | |
@@ -49,7 +51,7 @@ The GIF and the world and task pictures come from a waipu tv stick. The parent a
 | `theme/` | The children's interface, pictures and fonts |
 | `kidsmode/` | Rules, guard, parent area, database and the phone page |
 | `media/` | Pictures for this page |
-| `docs/` | Test sheet for the remote |
+| `docs/` | [FAQ](docs/FAQ.md) and the [test sheet for the remote](docs/REMOTE_TEST.md) |
 
 ## Build
 
@@ -88,9 +90,7 @@ Open `http://<tv ip>:8686` in the phone's browser. To keep it on the home screen
 screen". Browsers install web apps only over HTTPS, so on this plain HTTP page you get a shortcut. Give the TV a fixed
 address in your router, because the shortcut holds the IP address.
 
-If a phone shows `ERR_TOO_MANY_RETRIES` or cannot open the page while the internet works, the browser may lack access to
-the local network. On newer Android versions, allow "Nearby devices" or "Local network" for the browser in the app's
-permissions.
+If a phone cannot open the page, for example with `ERR_TOO_MANY_RETRIES`, see the [FAQ](docs/FAQ.md).
 
 ## Permissions and background work
 
@@ -108,22 +108,22 @@ No accounts, telemetry, ads or analytics. Data stays on the TV.
 - This is a hurdle for children, not a guarantee. Android offers an app like this no system-wide lock.
 - The phone page uses plain HTTP. See [SECURITY.md](SECURITY.md).
 - A force-stop in Android's settings turns the guard off, and turning the setting back on is not enough: it runs again
-  after the next reboot or reinstall. The parent area shows the real state, counted apps
-  no longer start, the home screen asks for a parent, and the log records it once the guard is back. The phone page
-  stops responding meanwhile.
+  after the next reboot or reinstall. The parent area shows the real state, counted apps no longer start, the home
+  screen asks for a parent, and the log records it once the guard is back. The phone page stops responding meanwhile.
 - Time counts while a counted app is in front, including a paused video.
 - The stick cannot always tell that the TV is off. Without HDMI-CEC it stays awake, the app keeps playing and the time
   keeps counting when only the TV is switched off.
-- The time window follows the device clock. A clock set back gives no new day. A clock set forward starts a new day, and that day then stays until the real date
-  catches up. Settings stay behind the PIN for that reason.
+- The time window follows the device clock. A clock set back gives no new day. A clock set forward starts a new day, and
+  that day then stays until the real date catches up. Settings stay behind the PIN for that reason.
 - Removing the app deletes all its data.
 
 ## Tested on
 
-- waipu tv stick (SEI700WP), Android 11: installation, cold start, phone page on a real phone, English and German.
+- waipu tv stick (SEI700WP), Android 11: installation, cold start, remote, HDMI, live TV, and the phone page on real
+  phones.
 - Android TV 11 emulator.
 
-Remote keys, HDMI and live TV are still being tested with [this sheet](docs/REMOTE_TEST.md).
+For other devices, this [test sheet](docs/REMOTE_TEST.md) lists what to check.
 
 ## Version
 
