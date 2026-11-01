@@ -58,6 +58,12 @@ public final class KidsRemote {
         void onOpenSettings();
     }
 
+    /** Name und Icon, wenn die Seite auf den Startbildschirm des Handys gelegt wird. */
+    private static final String MANIFEST = "{\"name\":\"Kids World\",\"short_name\":\"Kids World\",\"start_url\":\"/\","
+            + "\"scope\":\"/\",\"display\":\"standalone\",\"background_color\":\"#14122b\",\"theme_color\":\"#14122b\","
+            + "\"icons\":[{\"src\":\"/icon-192.png\",\"sizes\":\"192x192\",\"type\":\"image/png\"},"
+            + "{\"src\":\"/icon-512.png\",\"sizes\":\"512x512\",\"type\":\"image/png\"}]}";
+
     private static final class Request {
         String method, path, token, host, origin;
         Map<String, String> params = new HashMap<>();
@@ -146,6 +152,10 @@ public final class KidsRemote {
                 String page = new String(readAll(ctx.getResources().openRawResource(R.raw.sc_remote)), StandardCharsets.UTF_8);
                 send(out, "200 OK", "text/html; charset=utf-8",
                         page.replace("%LANG%", KidsLanguage.shown(ctx)).getBytes(StandardCharsets.UTF_8));
+            } else if (r.path.equals("/manifest.webmanifest")) {
+                send(out, "200 OK", "application/manifest+json", MANIFEST.getBytes(StandardCharsets.UTF_8));
+            } else if (r.path.matches("/icon-(180|192|512)\.png")) {
+                art(out, "handy/icon_" + r.path.substring(6, r.path.length() - 4) + ".png");
             } else if (r.path.startsWith("/art/") && RemoteText.safeArt(r.path.substring(5))) {
                 art(out, r.path.substring(5));
             } else {
