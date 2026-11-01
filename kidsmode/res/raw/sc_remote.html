@@ -223,7 +223,7 @@ el('label',{text:'PIN ändern'}),pin,el('p',{},[el('button',{text:'PIN speichern
 ]));
 var list=el('section',{},[el('h2',{raw:t('Gekoppelte Geräte')+' ('+data.devices.length+')'})]);
 data.devices.forEach(function(d){list.appendChild(el('div',{},[el('strong',{raw:(d.name||t('Unbekanntes Gerät'))+(d.me?' · '+t('dieses Gerät'):'')}),
-el('p',{'class':'muted',raw:(d.paired?t('gekoppelt ')+when(d.paired)+' · ':'')+(d.seen?t('zuletzt ')+when(d.seen):t('noch nicht wieder angemeldet'))}),
+el('p',{'class':'muted',raw:(d.paired?t('gekoppelt ')+when(d.paired)+' · ':'')+(d.seen?t('zuletzt ')+when(d.seen):t('noch nicht wieder angemeldet'))+(d.ip?' · IP '+d.ip:'')}),
 el('div',{'class':'row'},[el('button',{'class':'off',text:'Umbenennen',on:function(){var n=prompt(t('Name des Geräts'),d.name);if(n!==null&&n.trim())act({a:'devname',dev:d.id,name:n})}}),el('button',{'class':'off',text:'Entfernen',on:function(){if(confirm(t('Gerät entfernen? Es muss sich neu koppeln.')))act({a:'devdel',dev:d.id})}})])]));});
 if(data.devices.length)list.appendChild(el('p',{},[el('button',{'class':'danger',text:'Alle entfernen',on:function(){if(confirm(t('Alle Handys entfernen? Sie müssen sich neu koppeln.')))act({a:'devices'})}})]));
 root.appendChild(list);

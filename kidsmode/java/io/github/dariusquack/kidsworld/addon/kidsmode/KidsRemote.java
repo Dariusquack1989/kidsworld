@@ -66,7 +66,7 @@ public final class KidsRemote {
             + "{\"src\":\"/icon-512.png\",\"sizes\":\"512x512\",\"type\":\"image/png\"}]}";
 
     private static final class Request {
-        String method, path, token, host, origin, agent;
+        String method, path, token, host, origin, agent, ip;
         Map<String, String> params = new HashMap<>();
     }
 
@@ -145,6 +145,7 @@ public final class KidsRemote {
     private void handle(Socket c) throws IOException {
         OutputStream out = c.getOutputStream();
         Request r = read(c.getInputStream());
+        if (r != null) r.ip = c.getInetAddress().getHostAddress().replace("::ffff:", "");
         KidsLanguage.apply(ctx);
         if (r == null) {
             send(out, "400 Bad Request", "text/plain", new byte[0]);
@@ -292,9 +293,10 @@ public final class KidsRemote {
     }
 
     /** Merkt sich Name und letzte Nutzung; einen Namen von den Eltern überschreibt die Browser-Kennung nicht. */
-    private void touchDevice(String hash, String agent, boolean paired) {
+    private void touchDevice(String hash, Request r, boolean paired) {
         long now = System.currentTimeMillis();
-        SharedPreferences.Editor e = devices.edit().putLong("seen_" + hash, now).putString("agent_" + hash, RemoteText.deviceName(agent));
+        SharedPreferences.Editor e = devices.edit().putLong("seen_" + hash, now).putString("agent_" + hash, RemoteText.deviceName(r.agent))
+                .putString("ip_" + hash, r.ip);
         if (paired) e.putLong("paired_" + hash, now);
         e.apply();
     }
@@ -310,7 +312,7 @@ public final class KidsRemote {
     private void forgetDevice(String hash) {
         Set<String> known = knownDevices();
         known.remove(hash);
-        devices.edit().putStringSet(KEY_DEVICES, known).remove("seen_" + hash).remove("agent_" + hash).remove("paired_" + hash)
+        devices.edit().putStringSet(KEY_DEVICES, known).remove("seen_" + hash).remove("agent_" + hash).remove("paired_" + hash).remove("ip_" + hash)
                 .remove("name_" + hash).apply();
         synchronized (sessions) {
             Iterator<Map.Entry<String, String>> it = sessionDevice.entrySet().iterator();
@@ -328,7 +330,7 @@ public final class KidsRemote {
         if (!pinOk(out, r.params.get("pin"))) return;
         String device = r.params.get("device");
         if (device != null && knownDevices().contains(deviceHash(device))) {
-            touchDevice(deviceHash(device), r.agent, false);
+            touchDevice(deviceHash(device), r, false);
             sendJson(out, "200 OK", "{\"token\":\"" + newSession(deviceHash(device)) + "\"}");
             return;
         }
@@ -359,7 +361,7 @@ public final class KidsRemote {
         Set<String> known = knownDevices();
         known.add(deviceHash(device));
         devices.edit().putStringSet(KEY_DEVICES, known).apply();
-        touchDevice(deviceHash(device), r.agent, true);
+        touchDevice(deviceHash(device), r, true);
         sendJson(out, "200 OK", "{\"token\":\"" + newSession(deviceHash(device)) + "\",\"device\":\"" + device + "\"}");
     }
 
@@ -424,6 +426,7 @@ public final class KidsRemote {
             field(b, "name", given.isEmpty() ? devices.getString("agent_" + h, "") : given);
             field(b, "paired", devices.getLong("paired_" + h, 0));
             field(b, "seen", devices.getLong("seen_" + h, 0));
+            field(b, "ip", devices.getString("ip_" + h, ""));
             field(b, "me", h.equals(me));
             close(b, '}');
         }
