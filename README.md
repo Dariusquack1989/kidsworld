@@ -18,7 +18,8 @@ The app follows the TV's language: English, or German on a German TV. A parent c
 | ![Task list on the TV](media/tasks.jpg) | ![Who is playing today](media/profiles.jpg) |
 | ![PIN entry](media/parent-pin.jpg) | ![Parent area](media/parent.jpg) |
 | ![Turning apps on and off](media/parent-apps.jpg) | ![Phone page: tasks](media/phone-tasks.jpg) |
-| ![Phone page: screen time](media/phone-time.jpg) | |
+| ![Phone page: task catalogue](media/phone-catalog.jpg) | ![Phone page: week plan](media/phone-week.jpg) |
+| ![Phone page: one day](media/phone-day.jpg) | ![Phone page: paired devices](media/phone-devices.jpg) |
 
 The GIF and the world and task pictures come from a waipu tv stick. The parent area, profile and phone pictures come from the emulator with sample data. Child names and the network address are blurred.
 
@@ -31,7 +32,7 @@ The GIF and the world and task pictures come from a waipu tv stick. The parent a
   never exceeded.
 - Apps that count against screen time, or apps a parent marks as free.
 - A web page for the parent's phone on the home network (port 8686): confirm tasks, change time, see usage, send a
-  message to the TV. A phone pairs once with a code shown on the TV.
+  message to the TV. A phone pairs once with a code shown on the TV, and parents can see, rename and remove each device.
 
 ## Requirements
 
@@ -81,6 +82,12 @@ ADB when you are done.
 
 To remove it, run `adb uninstall io.github.dariusquack.kidsworld`. This deletes the PIN, tasks and time accounts.
 
+## The phone page
+
+Open `http://<tv ip>:8686` in the phone's browser. To keep it on the home screen, use the browser's menu: "Add to Home
+screen". Browsers install web apps only over HTTPS, so on this plain HTTP page you get a shortcut. Give the TV a fixed
+address in your router, because the shortcut holds the IP address.
+
 ## Permissions and background work
 
 | Item | Why |
@@ -116,7 +123,7 @@ Remote keys, HDMI and live TV are still being tested with [this sheet](docs/REMO
 
 ## Version
 
-1.0.0, see [CHANGELOG.md](CHANGELOG.md).
+1.1.0, see [CHANGELOG.md](CHANGELOG.md).
 
 ## Licence and credits
 

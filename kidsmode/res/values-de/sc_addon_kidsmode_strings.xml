@@ -60,6 +60,7 @@
     <string name="sc_err_app_denied">App nicht erlaubt</string>
     <string name="sc_err_no_app">App fehlt</string>
     <string name="sc_err_window">Das Ende muss nach dem Start liegen</string>
+    <string name="sc_err_no_device">Gerät nicht gefunden</string>
     <string name="sc_err_task_name">Die Aufgabe braucht einen Namen</string>
     <string name="sc_log_correction">Korrektur</string>
     <string name="sc_log_carry">Übertrag von gestern</string>

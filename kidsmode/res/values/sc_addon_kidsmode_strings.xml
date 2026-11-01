@@ -60,6 +60,7 @@
     <string name="sc_err_app_denied">App not allowed</string>
     <string name="sc_err_no_app">App missing</string>
     <string name="sc_err_window">The end time must be after the start time</string>
+    <string name="sc_err_no_device">Device not found</string>
     <string name="sc_err_task_name">The task needs a name</string>
     <string name="sc_log_correction">Correction</string>
     <string name="sc_log_carry">Carried over from yesterday</string>

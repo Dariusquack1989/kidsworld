@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,7 +47,7 @@ public final class KidsRemote {
     private static final int TIMEOUT_MS = 5000;
     private static final int MAX_REQUEST = 8192;
     private static final int MAX_MESSAGE = 200, MAX_NAME = 20, MAX_TITLE = 60, MINUTES_PER_DAY = 1440;
-    private static final int LOG_LINES = 40, USAGE_DAYS = 7;
+    private static final int LOG_LINES = 40, USAGE_DAYS = 7, DEVICE_ID = 12;
     private static final String DEVICES = "sc_kids_devices", KEY_DEVICES = "devices", DEVICE_SALT = "kidsworld-device";
 
     /** Was der Wächter für die Handy-Verwaltung tut; läuft nicht auf dem Haupt-Thread. */
@@ -65,7 +66,7 @@ public final class KidsRemote {
             + "{\"src\":\"/icon-512.png\",\"sizes\":\"512x512\",\"type\":\"image/png\"}]}";
 
     private static final class Request {
-        String method, path, token, host, origin;
+        String method, path, token, host, origin, agent;
         Map<String, String> params = new HashMap<>();
     }
 
@@ -78,6 +79,8 @@ public final class KidsRemote {
     private final SharedPreferences devices;
     private final SecureRandom random = new SecureRandom();
     private static final Map<String, Long> sessions = new HashMap<>();
+    /** Welches Gerät zu einer Sitzung gehört; beide Karten stehen unter dem Schloss von {@code sessions}. */
+    private static final Map<String, String> sessionDevice = new HashMap<>();
     private final ExecutorService workers = Executors.newFixedThreadPool(6);
     private List<AppEntry> apps = new ArrayList<>();
     private long appsAt;
@@ -154,7 +157,7 @@ public final class KidsRemote {
                         page.replace("%LANG%", KidsLanguage.shown(ctx)).getBytes(StandardCharsets.UTF_8));
             } else if (r.path.equals("/manifest.webmanifest")) {
                 send(out, "200 OK", "application/manifest+json", MANIFEST.getBytes(StandardCharsets.UTF_8));
-            } else if (r.path.matches("/icon-(180|192|512)\.png")) {
+            } else if (r.path.matches("/icon-(180|192|512)\\.png")) {
                 art(out, "handy/icon_" + r.path.substring(6, r.path.length() - 4) + ".png");
             } else if (r.path.startsWith("/art/") && RemoteText.safeArt(r.path.substring(5))) {
                 art(out, r.path.substring(5));
@@ -170,12 +173,12 @@ public final class KidsRemote {
         } else if (!authorized(r.token)) {
             sendJson(out, "401 Unauthorized", "{\"error\":\"login\"}");
         } else if (r.path.equals("/api/state")) {
-            sendJson(out, "200 OK", state());
+            sendJson(out, "200 OK", state(r.token));
         } else if (r.path.equals("/api/do")) {
             String error = act(r.params);
             listener.onChange();
             if (error != null) sendJson(out, "400 Bad Request", "{\"error\":" + RemoteText.str(error) + "}");
-            else sendJson(out, "200 OK", state());
+            else sendJson(out, "200 OK", state(r.token));
         } else {
             send(out, "404 Not Found", "text/plain", new byte[0]);
         }
@@ -206,6 +209,7 @@ public final class KidsRemote {
             if (name.equals("x-token")) r.token = value;
             if (name.equals("host")) r.host = value;
             if (name.equals("origin")) r.origin = value;
+            if (name.equals("user-agent")) r.agent = value;
         }
         if (length < 0 || length > MAX_REQUEST) return null;
         byte[] body = new byte[length];
@@ -278,19 +282,54 @@ public final class KidsRemote {
         return false;
     }
 
-    private String newSession() {
+    private String newSession(String device) {
         String t = randomHex(16);
         synchronized (sessions) {
             sessions.put(t, System.currentTimeMillis() + SESSION_MS);
+            sessionDevice.put(t, device);
         }
         return t;
+    }
+
+    /** Merkt sich Name und letzte Nutzung; einen Namen von den Eltern überschreibt die Browser-Kennung nicht. */
+    private void touchDevice(String hash, String agent, boolean paired) {
+        long now = System.currentTimeMillis();
+        SharedPreferences.Editor e = devices.edit().putLong("seen_" + hash, now).putString("agent_" + hash, RemoteText.deviceName(agent));
+        if (paired) e.putLong("paired_" + hash, now);
+        e.apply();
+    }
+
+    private String deviceHashOf(String shortId) {
+        for (String h : knownDevices()) {
+            if (h.startsWith(shortId)) return h;
+        }
+        return null;
+    }
+
+    /** Entfernt ein Gerät und beendet seine Sitzungen. */
+    private void forgetDevice(String hash) {
+        Set<String> known = knownDevices();
+        known.remove(hash);
+        devices.edit().putStringSet(KEY_DEVICES, known).remove("seen_" + hash).remove("agent_" + hash).remove("paired_" + hash)
+                .remove("name_" + hash).apply();
+        synchronized (sessions) {
+            Iterator<Map.Entry<String, String>> it = sessionDevice.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<String, String> s = it.next();
+                if (hash.equals(s.getValue())) {
+                    sessions.remove(s.getKey());
+                    it.remove();
+                }
+            }
+        }
     }
 
     private void login(OutputStream out, Request r) throws IOException {
         if (!pinOk(out, r.params.get("pin"))) return;
         String device = r.params.get("device");
         if (device != null && knownDevices().contains(deviceHash(device))) {
-            sendJson(out, "200 OK", "{\"token\":\"" + newSession() + "\"}");
+            touchDevice(deviceHash(device), r.agent, false);
+            sendJson(out, "200 OK", "{\"token\":\"" + newSession(deviceHash(device)) + "\"}");
             return;
         }
         // Unbekanntes Handy: Code auf dem TV zeigen. Wer nur vor dem TV sitzt, kennt die PIN nicht.
@@ -320,7 +359,8 @@ public final class KidsRemote {
         Set<String> known = knownDevices();
         known.add(deviceHash(device));
         devices.edit().putStringSet(KEY_DEVICES, known).apply();
-        sendJson(out, "200 OK", "{\"token\":\"" + newSession() + "\",\"device\":\"" + device + "\"}");
+        touchDevice(deviceHash(device), r.agent, true);
+        sendJson(out, "200 OK", "{\"token\":\"" + newSession(deviceHash(device)) + "\",\"device\":\"" + device + "\"}");
     }
 
     private boolean authorized(String token) {
@@ -341,6 +381,7 @@ public final class KidsRemote {
     public static void endSessions() {
         synchronized (sessions) {
             sessions.clear();
+            sessionDevice.clear();
         }
     }
 
@@ -367,11 +408,26 @@ public final class KidsRemote {
         b.append(end).append(',');
     }
 
-    private synchronized String state() {
+    private synchronized String state(String token) {
+        String me;
+        synchronized (sessions) {
+            me = sessionDevice.get(token);
+        }
         StringBuilder b = new StringBuilder("{");
         field(b, "locked", gate.lockedNow());
         field(b, "calm", lock.calmMotion());
-        field(b, "devices", knownDevices().size());
+        b.append("\"devices\":[");
+        for (String h : knownDevices()) {
+            String given = devices.getString("name_" + h, "");
+            b.append('{');
+            field(b, "id", h.substring(0, DEVICE_ID));
+            field(b, "name", given.isEmpty() ? devices.getString("agent_" + h, "") : given);
+            field(b, "paired", devices.getLong("paired_" + h, 0));
+            field(b, "seen", devices.getLong("seen_" + h, 0));
+            field(b, "me", h.equals(me));
+            close(b, '}');
+        }
+        close(b, ']');
         field(b, "active", profiles.active().id);
         b.append("\"pending\":[");
         for (KidsDb.Task t : db.waiting()) {
@@ -513,6 +569,13 @@ public final class KidsRemote {
                 return null;
             case "devices":
                 forgetDevices(ctx);
+                return null;
+            case "devname":
+            case "devdel":
+                String hash = deviceHashOf(String.valueOf(q.get("dev")));
+                if (hash == null) return ctx.getString(R.string.sc_err_no_device);
+                if (a.equals("devdel")) forgetDevice(hash);
+                else devices.edit().putString("name_" + hash, RemoteText.limited(String.valueOf(q.get("name")).trim(), MAX_NAME)).apply();
                 return null;
             case "add":
                 String kidName = q.get("name");

@@ -4,6 +4,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /** Textarbeit der Handy-Steuerung: Adressen zerlegen, JSON-Text schützen. Reine Logik, testbar. */
 final class RemoteText {
@@ -48,6 +50,21 @@ final class RemoteText {
     static boolean localRequest(String host, String origin) {
         if (host == null || !host.matches("((\\d{1,3}\\.){3}\\d{1,3}|localhost)(:\\d+)?")) return false;
         return origin == null || origin.equals("http://" + host);
+    }
+
+    /** Name eines Geräts aus der Browser-Kennung; leer, wenn sie nichts verrät. Chrome verbirgt das Modell oft als „K“. */
+    static String deviceName(String agent) {
+        if (agent == null) return "";
+        if (agent.contains("iPhone")) return "iPhone";
+        if (agent.contains("iPad")) return "iPad";
+        Matcher android = Pattern.compile("Android [\\d.]+; ([^;)]+)").matcher(agent);
+        if (android.find()) {
+            String model = android.group(1).replaceAll(" Build.*", "").trim();
+            return model.isEmpty() || model.equals("K") || model.equals("wv") ? "Android" : model;
+        }
+        if (agent.contains("Android")) return "Android";
+        if (agent.contains("Windows")) return "Windows";
+        return agent.contains("Macintosh") ? "Mac" : "";
     }
 
     static String limited(String s, int max) {

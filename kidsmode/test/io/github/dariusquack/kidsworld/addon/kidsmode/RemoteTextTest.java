@@ -58,4 +58,13 @@ public class RemoteTextTest {
         assertFalse(RemoteText.localRequest("192.168.1.50:8686", "http://evil.example"));
         assertFalse(RemoteText.localRequest(null, null));
     }
+
+    @Test
+    public void deviceNames() {
+        assertEquals("SM-S918B", RemoteText.deviceName("Mozilla/5.0 (Linux; Android 14; SM-S918B Build/UP1A) Chrome/120"));
+        assertEquals("Android", RemoteText.deviceName("Mozilla/5.0 (Linux; Android 10; K) Chrome/120"));
+        assertEquals("iPhone", RemoteText.deviceName("Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)"));
+        assertEquals("Windows", RemoteText.deviceName("Mozilla/5.0 (Windows NT 10.0; Win64; x64)"));
+        assertEquals("", RemoteText.deviceName(null));
+    }
 }
