@@ -15,6 +15,7 @@ import com.gathin.tvhome.R;
 import java.util.List;
 
 import io.github.dariusquack.kidsworld.addon.kidsmode.KidsDb;
+import io.github.dariusquack.kidsworld.addon.kidsmode.TaskCatalog;
 
 /**
  * „Meine Aufgaben“: oben die Medienzeit, darunter die Aufgaben als große Karten. OK meldet eine Aufgabe als fertig; die
@@ -24,6 +25,9 @@ final class TaskView extends FrameLayout {
     interface Listener {
         void onMark(KidsDb.Task task);
     }
+
+    private static final int[] CATEGORIES = {R.string.sc_task_cat_school, R.string.sc_task_cat_room, R.string.sc_task_cat_home,
+            R.string.sc_task_cat_special};
 
     private final Typeface font;
     private final Listener listener;
@@ -111,6 +115,9 @@ final class TaskView extends FrameLayout {
         TextView title = text(t.title, 22, Color.WHITE);
         title.setGravity(Gravity.START);
         words.addView(title);
+        TextView kind = text(TaskCatalog.symbol(t.category) + " " + getContext().getString(CATEGORIES[t.category]), 14, 0xCCFFFFFF);
+        kind.setGravity(Gravity.START);
+        words.addView(kind);
         String detail = t.reason != null && !t.reason.isEmpty() ? t.reason : t.description;
         if (detail != null && !detail.isEmpty()) {
             TextView desc = text(detail, 15, 0xCCFFFFFF);

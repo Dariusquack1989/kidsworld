@@ -14,7 +14,7 @@ button,select,input,textarea{font:inherit;border-radius:10px;border:0;padding:10
 button{background:#fff;color:#14122b;font-weight:600}
 button.off{background:#3a3660;color:#fff}
 button.danger{background:#ffb37a;color:#14122b}
-input,textarea{background:#3a3660;color:#fff;width:100%;box-sizing:border-box;margin:4px 0 8px}
+input,textarea,select{background:#3a3660;color:#fff;width:100%;box-sizing:border-box;margin:4px 0 8px}
 input[type=checkbox]{width:24px;min-height:24px;margin:0}
 label{display:block;font-size:14px;color:#d9d6ee}
 .row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0}
@@ -46,8 +46,11 @@ label{display:block;font-size:14px;color:#d9d6ee}
 <script>
 var token=null,data=null,current=null,view='confirm',draft='',editing=null;
 var lang='%LANG%';
-var EN={"Eltern-PIN":"Parent PIN","Code vom Fernseher":"Code from the TV","Anmelden":"Sign in","KidsWorld Eltern":"Kids World Parents","Bestätigen":"Confirm","Aufgaben":"Tasks","Medienzeit":"Screen time","Nutzung":"Usage","Kinder":"Children","offen":"to do","wartet auf Bestätigung":"waiting for confirmation","bestätigt":"confirmed","abgelehnt":"rejected","Aufgabe":"Task","Korrektur":"Correction","Übertrag":"Carry-over","Uhr":"Clock","Wächter":"Guard","Keine Verbindung zum TV: TV aus, WLAN weg oder Wächter nicht aktiv. Die Anzeige ist nicht aktuell.":"No connection to the TV: TV off, no Wi-Fi or guard not running. This page is out of date.","Keine Verbindung zum TV. Bitte später prüfen, ob es gespeichert wurde.":"No connection to the TV. Please check later whether it was saved.","Zu viele Versuche. Bitte eine Minute warten.":"Too many attempts. Please wait a minute.","Bitte zuerst am TV eine PIN festlegen.":"Please set a PIN on the TV first.","Falscher Code":"Wrong code","Falsche PIN":"Wrong PIN","Dieses Handy ist neu: Bitte den Code vom Fernseher eingeben.":"This phone is new: please enter the code from the TV.","Keine offenen Bestätigungen.":"Nothing to confirm.","Begründung (freiwillig)":"Reason (optional)","Begründung":"Reason","Begründung: ":"Reason: ","Ablehnen":"Reject","Min.":"min","einmalig":"once","täglich":"daily","Neue Aufgabe":"New task","Noch keine Aufgaben.":"No tasks yet.","heute nicht dran":"not today"," · ohne Bestätigung":" · no confirmation","Bearbeiten":"Edit","Löschen":"Delete","Aufgabe löschen?":"Delete task?","Aufgabe bearbeiten":"Edit task","Neue Aufgabe für ":"New task for ","Beschreibung":"Description","Zusätzliche Minuten":"Extra minutes","Wiederholung (kein Tag gewählt = einmalig)":"Repeat (no day chosen = once)","Gültig bis (leer = unbegrenzt)":"Valid until (empty = no end)","Elternbestätigung nötig":"Parent confirmation needed","Ohne Bestätigung bekommt das Kind die Minuten sofort beim Melden.":"Without confirmation the child gets the minutes as soon as the task is reported.","Speichern":"Save","Abbrechen":"Cancel","Heute":"Today","Verfügbar ":"Available ",", genutzt ":", used ",", noch ":", left ",", heute verdient ":", earned today ","Kein Zeitkonto: Medienzeit ist unbegrenzt. Genutzt: ":"No time account: screen time is unlimited. Used: ","Grundzeit pro Tag (Minuten)":"Base time per day (minutes)","Maximale Zusatzzeit (0 = keine Grenze)":"Maximum extra time (0 = no limit)","Maximale Tageszeit (0 = keine Grenze)":"Maximum daily time (0 = no limit)","Medienzeitkonto":"Screen time account","Zeitkonto ein":"Time account on","Ungenutzte Zusatzminuten mitnehmen":"Carry over unused extra minutes","Mediennutzung erlaubt":"Screen time allowed","Von":"From","Bis":"To","Immer erlaubt":"Always allowed","Minuten, zum Beispiel 15 oder -10":"Minutes, for example 15 or -10","Grund":"Reason","Zeit korrigieren":"Correct time","Das Tagesmaximum gilt auch hier.":"The daily maximum applies here too.","Minuten":"Minutes","Buchen":"Apply","Links: aktiv, deaktiviert, Favorit. Rechts: ob die App Medienzeit kostet.":"Left: on, off, favourite. Right: whether the app uses screen time.","Favorit":"Favourite","aktiv":"on","deaktiviert":"off","kostenlos":"free","zählt":"counts","Letzte 7 Tage":"Last 7 days","Gestern":"Yesterday","Protokoll":"Log","Noch keine Einträge.":"No entries yet.","Kind":"Child","Name speichern":"Save name","Avatar wechseln":"Change avatar","Profil löschen":"Delete profile"," wirklich löschen?":": really delete?","Name des neuen Kindes":"New child's name","Neues Kind":"New child","Anlegen":"Add","an":"on","aus":"off","TV ist gesperrt":"TV is locked","TV ist frei":"TV is unlocked","Entsperren":"Unlock","Jetzt sperren":"Lock now","Zum Beispiel: Essen ist fertig!":"For example: Dinner is ready!","Nachricht":"Message","Nachricht an den TV":"Message to the TV","Senden":"Send","Neue PIN, 4 Ziffern":"New PIN, 4 digits","Neue PIN":"New PIN","Einstellungen":"Settings","Ruhige Animationen":"Calm animations","TV-Einstellungen (10 Minuten ohne Wächter)":"TV settings (10 minutes without guard)","Öffnen":"Open","PIN ändern":"Change PIN","PIN speichern":"Save PIN","Bitte 4 Ziffern eingeben":"Please enter 4 digits","Gekoppelte Handys: ":"Paired phones: ","Alle entfernen":"Remove all","Alle Handys entfernen? Sie müssen sich neu koppeln.":"Remove all phones? They will need to pair again."};
+var EN={"Einmalig":"Once","Täglich":"Daily","An bestimmten Wochentagen":"On chosen weekdays","Wöchentlich":"Weekly","Bei Bedarf":"When needed","wöchentlich":"weekly","bei Bedarf":"when needed","alle Altersgruppen":"all ages","nicht am Wochenende":"not at weekends","Aus Vorlage":"From catalogue","Deaktivieren":"Turn off","Aktivieren":"Turn on","Zurück":"Back","Nur passende Altersgruppe":"Matching age group only","Alle Altersgruppen":"All age groups","Vorschlag für ":"Suggested for ","Das ist nur eine Empfehlung.":"This is only a recommendation.","Wählen":"Choose","Kategorie":"Category","Für diese Kinder":"For these children","Empfohlene Altersgruppe":"Recommended age group","Wiederholung":"Repeat","Am Wochenende verfügbar":"Available at weekends","Aufgabe aktiv":"Task active","Bitte mindestens ein Kind wählen":"Please choose at least one child","fernsehfrei":"no TV","Grundzeit (Minuten)":"Base time (minutes)","Maximale Zusatzzeit (Minuten)":"Maximum extra time (minutes)","TV an diesem Tag aktiv":"TV allowed on this day","TV-Start":"TV start","TV-Ende":"TV end","Auf andere Tage kopieren":"Copy to other days","Kopieren":"Copy","Medienzeiten":"Screen times","Das Zeitfenster gilt immer, auch wenn noch Minuten übrig sind.":"The time window always applies, even with minutes left.","Schließen":"Close","Ändern":"Change","Auf anderes Kind kopieren":"Copy to another child","Kopiert die Werte einmalig. Spätere Änderungen gelten nur für das jeweilige Kind.":"Copies the values once. Later changes apply only to that child.","Wochenzeiten überschreiben?":"Overwrite weekly times?","gemeldet ":"reported ","Alter (für den Vorschlag der Altersgruppe)":"Age (to suggest an age group)","Schule und Lernen":"School and learning","Zimmer und Ordnung":"Room and tidying","Haushalt und Familienhilfe":"Home and family help","Besondere Aufgaben":"Special tasks","Montag":"Monday","Dienstag":"Tuesday","Mittwoch":"Wednesday","Donnerstag":"Thursday","Freitag":"Friday","Samstag":"Saturday","Sonntag":"Sunday","Eltern-PIN":"Parent PIN","Code vom Fernseher":"Code from the TV","Anmelden":"Sign in","KidsWorld Eltern":"Kids World Parents","Bestätigen":"Confirm","Aufgaben":"Tasks","Medienzeit":"Screen time","Nutzung":"Usage","Kinder":"Children","offen":"to do","wartet auf Bestätigung":"waiting for confirmation","bestätigt":"confirmed","abgelehnt":"rejected","Aufgabe":"Task","Korrektur":"Correction","Übertrag":"Carry-over","Uhr":"Clock","Wächter":"Guard","Keine Verbindung zum TV: TV aus, WLAN weg oder Wächter nicht aktiv. Die Anzeige ist nicht aktuell.":"No connection to the TV: TV off, no Wi-Fi or guard not running. This page is out of date.","Keine Verbindung zum TV. Bitte später prüfen, ob es gespeichert wurde.":"No connection to the TV. Please check later whether it was saved.","Zu viele Versuche. Bitte eine Minute warten.":"Too many attempts. Please wait a minute.","Bitte zuerst am TV eine PIN festlegen.":"Please set a PIN on the TV first.","Falscher Code":"Wrong code","Falsche PIN":"Wrong PIN","Dieses Handy ist neu: Bitte den Code vom Fernseher eingeben.":"This phone is new: please enter the code from the TV.","Keine offenen Bestätigungen.":"Nothing to confirm.","Begründung (freiwillig)":"Reason (optional)","Begründung":"Reason","Begründung: ":"Reason: ","Ablehnen":"Reject","Min.":"min","einmalig":"once","täglich":"daily","Neue Aufgabe":"New task","Noch keine Aufgaben.":"No tasks yet.","heute nicht dran":"not today"," · ohne Bestätigung":" · no confirmation","Bearbeiten":"Edit","Löschen":"Delete","Aufgabe löschen?":"Delete task?","Aufgabe bearbeiten":"Edit task","Neue Aufgabe für ":"New task for ","Beschreibung":"Description","Zusätzliche Minuten":"Extra minutes","Wiederholung (kein Tag gewählt = einmalig)":"Repeat (no day chosen = once)","Gültig bis (leer = unbegrenzt)":"Valid until (empty = no end)","Elternbestätigung nötig":"Parent confirmation needed","Ohne Bestätigung bekommt das Kind die Minuten sofort beim Melden.":"Without confirmation the child gets the minutes as soon as the task is reported.","Speichern":"Save","Abbrechen":"Cancel","Heute":"Today","Verfügbar ":"Available ",", genutzt ":", used ",", noch ":", left ",", heute verdient ":", earned today ","Kein Zeitkonto: Medienzeit ist unbegrenzt. Genutzt: ":"No time account: screen time is unlimited. Used: ","Grundzeit pro Tag (Minuten)":"Base time per day (minutes)","Maximale Zusatzzeit (0 = keine Grenze)":"Maximum extra time (0 = no limit)","Maximale Tageszeit (0 = keine Grenze)":"Maximum daily time (0 = no limit)","Medienzeitkonto":"Screen time account","Zeitkonto ein":"Time account on","Ungenutzte Zusatzminuten mitnehmen":"Carry over unused extra minutes","Mediennutzung erlaubt":"Screen time allowed","Von":"From","Bis":"To","Immer erlaubt":"Always allowed","Minuten, zum Beispiel 15 oder -10":"Minutes, for example 15 or -10","Grund":"Reason","Zeit korrigieren":"Correct time","Das Tagesmaximum gilt auch hier.":"The daily maximum applies here too.","Minuten":"Minutes","Buchen":"Apply","Links: aktiv, deaktiviert, Favorit. Rechts: ob die App Medienzeit kostet.":"Left: on, off, favourite. Right: whether the app uses screen time.","Favorit":"Favourite","aktiv":"on","deaktiviert":"off","kostenlos":"free","zählt":"counts","Letzte 7 Tage":"Last 7 days","Gestern":"Yesterday","Protokoll":"Log","Noch keine Einträge.":"No entries yet.","Kind":"Child","Name speichern":"Save name","Avatar wechseln":"Change avatar","Profil löschen":"Delete profile"," wirklich löschen?":": really delete?","Name des neuen Kindes":"New child's name","Neues Kind":"New child","Anlegen":"Add","an":"on","aus":"off","TV ist gesperrt":"TV is locked","TV ist frei":"TV is unlocked","Entsperren":"Unlock","Jetzt sperren":"Lock now","Zum Beispiel: Essen ist fertig!":"For example: Dinner is ready!","Nachricht":"Message","Nachricht an den TV":"Message to the TV","Senden":"Send","Neue PIN, 4 Ziffern":"New PIN, 4 digits","Neue PIN":"New PIN","Einstellungen":"Settings","Ruhige Animationen":"Calm animations","TV-Einstellungen (10 Minuten ohne Wächter)":"TV settings (10 minutes without guard)","Öffnen":"Open","PIN ändern":"Change PIN","PIN speichern":"Save PIN","Bitte 4 Ziffern eingeben":"Please enter 4 digits","Gekoppelte Handys: ":"Paired phones: ","Alle entfernen":"Remove all","Alle Handys entfernen? Sie müssen sich neu koppeln.":"Remove all phones? They will need to pair again."};
 function t(s){return lang=='en'&&EN[s]!==undefined?EN[s]:s}
+var cats=[['📚','Schule und Lernen'],['🧹','Zimmer und Ordnung'],['🏠','Haushalt und Familienhilfe'],['💡','Besondere Aufgaben']];
+var repeats=['Einmalig','Täglich','An bestimmten Wochentagen','Wöchentlich','Bei Bedarf'];
+var dayLong=['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
 var dayNames=lang=='en'?['Mon','Tue','Wed','Thu','Fri','Sat','Sun']:['Mo','Di','Mi','Do','Fr','Sa','So'];
 document.documentElement.lang=lang;document.title=t('KidsWorld Eltern');['hd','lpin','lcode','go'].forEach(function(i){var e=document.getElementById(i);e.textContent=t(e.textContent)});
 var views=[['confirm','Bestätigen'],['tasks','Aufgaben'],['time','Medienzeit'],['usage','Nutzung'],['kids','Kinder'],['tv','TV']];
@@ -61,7 +64,7 @@ var lost=null;
 function net(ok){if(!lost){lost=el('div',{text:'Keine Verbindung zum TV: TV aus, WLAN weg oder Wächter nicht aktiv. Die Anzeige ist nicht aktuell.',style:'position:sticky;top:0;z-index:9;padding:12px;background:#b0413e;color:#fff;font-weight:600;text-align:center'});document.body.insertBefore(lost,document.body.firstChild);}lost.hidden=ok;}
 function act(params){return post('/api/do',params).then(function(d){net(true);if(d.error){alert(d.error);return;}data=d;render();},function(){net(false);alert(t('Keine Verbindung zum TV. Bitte später prüfen, ob es gespeichert wurde.'));});}
 function busy(){var e=document.activeElement;return e&&(e.tagName=='INPUT'||e.tagName=='TEXTAREA');}
-function refresh(){post('/api/state').then(function(d){net(true);if(d.error)return;var first=!data;data=d;if(!current)current=d.active;if(first||(!editing&&!busy()))render();},function(){net(false);});}
+function refresh(){post('/api/state').then(function(d){net(true);if(d.error)return;var first=!data;data=d;if(!current)current=d.active;if(first||(!editing&&openDay<0&&!busy()))render();},function(){net(false);});}
 function loginError(e){document.getElementById('err').textContent=t(e=='locked'?'Zu viele Versuche. Bitte eine Minute warten.':e=='nopin'?'Bitte zuerst am TV eine PIN festlegen.':e=='code'?'Falscher Code':'Falsche PIN');}
 function enter(t){token=t;document.getElementById('login').hidden=true;document.getElementById('app').hidden=false;refresh();setInterval(refresh,15000);}
 var pairing=false;
@@ -74,17 +77,17 @@ if(d.token)enter(d.token);
 else if(d.pair){pairing=true;document.getElementById('pairBox').hidden=false;document.getElementById('err').textContent=t('Dieses Handy ist neu: Bitte den Code vom Fernseher eingeben.');}
 else loginError(d.error);});};
 function pad(n){return (n<10?'0':'')+n}
-function clock(m){return m<0?'':pad(Math.floor(m/60))+':'+pad(m%60)}
-function minutes(t){var p=t.split(':');return p.length==2?(+p[0])*60+(+p[1]):-1}
+function clock(m){m=Math.min(m,1439);return m<0?'':pad(Math.floor(m/60))+':'+pad(m%60)}
+function minutes(v){var p=v.split(':'),m=p.length==2?(+p[0])*60+(+p[1]):0;return m>=1439?1440:m}
 function dayToDate(d){return d?new Date(d*864e5).toISOString().slice(0,10):''}
 function dateToDay(s){return s?Math.floor(Date.parse(s+'T00:00:00Z')/864e5):0}
 function kid(){return data.children.filter(function(x){return x.id==current})[0]||data.children[0]}
 function kidTabs(){var tabs=el('div',{'class':'tabs'});
-data.children.forEach(function(c){tabs.appendChild(el('button',{'class':c.id==kid().id?'':'off',on:function(){current=c.id;editing=null;render();}},[el('img',{src:'/art/avatare/avatar_'+c.avatar+'.png',alt:''}),el('span',{raw:c.name})]));});return tabs;}
+data.children.forEach(function(c){tabs.appendChild(el('button',{'class':c.id==kid().id?'':'off',on:function(){current=c.id;editing=null;openDay=-1;render();}},[el('img',{src:'/art/avatare/avatar_'+c.avatar+'.png',alt:''}),el('span',{raw:c.name})]));});return tabs;}
 function render(){
 var root=document.getElementById('app');root.textContent='';
 var nav=el('div',{'class':'tabs'});
-views.forEach(function(v){var b=el('button',{'class':view==v[0]?'':'off',on:function(){view=v[0];editing=null;render();}},[el('span',{text:v[1]})]);
+views.forEach(function(v){var b=el('button',{'class':view==v[0]?'':'off',on:function(){view=v[0];editing=null;openDay=-1;render();}},[el('span',{text:v[1]})]);
 if(v[0]=='confirm'&&data.pending.length)b.appendChild(el('span',{'class':'count',text:data.pending.length}));nav.appendChild(b);});
 root.appendChild(nav);
 ({confirm:vConfirm,tasks:vTasks,time:vTime,usage:vUsage,kids:vKids,tv:vTv})[view](root);
@@ -92,46 +95,83 @@ root.appendChild(nav);
 function vConfirm(root){
 if(!data.pending.length){root.appendChild(el('section',{},[el('p',{'class':'muted',text:'Keine offenen Bestätigungen.'})]));return;}
 data.pending.forEach(function(p){var why=el('input',{placeholder:'Begründung (freiwillig)','aria-label':'Begründung'});
-root.appendChild(el('section',{},[el('div',{'class':'row'},[el('img',{src:'/art/avatare/avatar_'+p.avatar+'.png',alt:'',width:'40',height:'40'}),el('span',{raw:p.kid+': '+p.title}),el('strong',{raw:'+'+p.minutes+' '+t('Min.')})]),why,
+root.appendChild(el('section',{},[el('div',{'class':'row'},[el('img',{src:'/art/avatare/avatar_'+p.avatar+'.png',alt:'',width:'40',height:'40'}),el('span',{raw:p.kid+': '+p.title}),el('strong',{raw:'+'+p.minutes+' '+t('Min.')})]),el('p',{'class':'muted',raw:catLabel(p.cat)+' · '+t('gemeldet ')+new Date(p.marked).toLocaleString(lang=='en'?'en-GB':'de-DE',{dateStyle:'short',timeStyle:'short'})}),why,
 el('div',{'class':'row'},[el('button',{text:'Bestätigen',on:function(){act({a:'confirm',run:p.run})}}),el('button',{'class':'off',text:'Ablehnen',on:function(){act({a:'reject',run:p.run,reason:why.value})}})])]));});
 }
-function repeatText(x){if(!x.days)return t('einmalig');if(x.days==127)return t('täglich');return dayNames.filter(function(n,i){return x.days&(1<<i)}).join(', ');}
+function repeatText(x){if(x.rep==0)return t('einmalig');if(x.rep==1)return t('täglich');if(x.rep==3)return t('wöchentlich');if(x.rep==4)return t('bei Bedarf');return dayNames.filter(function(n,i){return x.days&(1<<i)}).join(', ');}
+function agesText(m){var o=[];if(m&1)o.push('5–8');if(m&2)o.push('9–11');if(m&4)o.push('12–14');return o.length==3?t('alle Altersgruppen'):o.join(', ');}
+function catLabel(c){return cats[c][0]+' '+t(cats[c][1]);}
+function draft0(c){return {id:0,title:'',desc:'',minutes:15,cat:0,ages:7,rep:1,days:31,weekend:true,active:true,until:0,confirm:true,kids:[c.id]};}
 function vTasks(root){
 root.appendChild(kidTabs());var c=kid();
+if(editing=='catalog'){vCatalog(root,c);return;}
 if(editing){taskForm(root,c);return;}
-root.appendChild(el('p',{},[el('button',{text:'Neue Aufgabe',on:function(){editing={id:0,title:'',desc:'',minutes:15,days:0,until:0,confirm:true};render();}})]));
+root.appendChild(el('div',{'class':'row'},[el('button',{text:'Neue Aufgabe',on:function(){editing=draft0(c);render();}}),el('button',{'class':'off',text:'Aus Vorlage',on:function(){editing='catalog';render();}})]));
 if(!c.tasks.length)root.appendChild(el('section',{},[el('p',{'class':'muted',text:'Noch keine Aufgaben.'})]));
 c.tasks.forEach(function(x){root.appendChild(el('section',{},[el('strong',{raw:x.title}),
-el('p',{'class':'muted',raw:'+'+x.minutes+' '+t('Min.')+' · '+repeatText(x)+' · '+t(x.today?statusText[x.status]:'heute nicht dran')+(x.confirm?'':t(' · ohne Bestätigung'))}),
+el('p',{'class':'muted',raw:catLabel(x.cat)}),
+el('p',{'class':'muted',raw:'+'+x.minutes+' '+t('Min.')+' · '+repeatText(x)+(x.weekend?'':' · '+t('nicht am Wochenende'))+' · '+t(!x.active?'deaktiviert':x.today?statusText[x.status]:'heute nicht dran')+(x.confirm?'':t(' · ohne Bestätigung'))}),
 x.desc?el('p',{'class':'muted',raw:x.desc}):null,x.reason?el('p',{'class':'muted',raw:t('Begründung: ')+x.reason}):null,
-el('div',{'class':'row'},[el('button',{'class':'off',text:'Bearbeiten',on:function(){editing=x;render();}}),el('button',{'class':'off',text:'Löschen',on:function(){if(confirm(t('Aufgabe löschen?')))act({a:'taskdel',task:x.id})}})])]));});
+el('div',{'class':'row'},[el('button',{'class':'off',text:'Bearbeiten',on:function(){editing=x;render();}}),el('button',{'class':'off',text:x.active?'Deaktivieren':'Aktivieren',on:function(){act({a:'taskactive',task:x.id,v:x.active?0:1})}}),el('button',{'class':'off',text:'Löschen',on:function(){if(confirm(t('Aufgabe löschen?')))act({a:'taskdel',task:x.id})}})])]));});
 }
-function taskForm(root,c){var f=editing,days=f.days;
+var catalogAll=false;
+function vCatalog(root,c){
+root.appendChild(el('div',{'class':'row'},[el('button',{'class':'off',text:'Zurück',on:function(){editing=null;render();}}),
+c.group?el('button',{'class':'off',text:catalogAll?'Nur passende Altersgruppe':'Alle Altersgruppen',on:function(){catalogAll=!catalogAll;render();}}):null]));
+if(c.group&&!catalogAll)root.appendChild(el('p',{'class':'muted',raw:t('Vorschlag für ')+c.name+': '+agesText(c.group)+'. '+t('Das ist nur eine Empfehlung.')}));
+cats.forEach(function(k,i){var s=el('section',{},[el('h2',{raw:catLabel(i)})]);
+data.catalog.forEach(function(e){if(e.cat!=i||(c.group&&!catalogAll&&!(e.ages&c.group)))return;
+s.appendChild(el('div',{'class':'row'},[el('span',{raw:e.title+' · '+e.minutes+' '+t('Min.')+' · '+agesText(e.ages)}),el('button',{'class':'off',text:'Wählen',on:function(){var f=draft0(c);f.title=e.title;f.minutes=e.minutes;f.cat=e.cat;f.ages=e.ages;editing=f;render();}})]));});
+root.appendChild(s);});
+}
+function taskForm(root,c){var f=editing,days=f.days,picked=(f.kids||[]).slice();
 var title=el('input',{value:f.title,maxlength:'60',id:'tt'}),desc=el('textarea',{rows:'2',maxlength:'200',id:'td'}),mins=el('input',{type:'number',min:'0',max:'240',value:f.minutes,id:'tm'}),
-until=el('input',{type:'date',value:dayToDate(f.until),id:'tu'}),conf=el('input',{type:'checkbox',checked:f.confirm,id:'tc'});desc.value=f.desc;
-var row=el('div',{'class':'days'});function paint(){row.textContent='';dayNames.forEach(function(n,i){row.appendChild(el('button',{'class':days&(1<<i)?'':'off',text:n,on:function(){days^=1<<i;paint();}}));});}paint();
-root.appendChild(el('section',{},[el('h2',{raw:f.id?t('Aufgabe bearbeiten'):t('Neue Aufgabe für ')+c.name}),
-el('label',{'for':'tt',text:'Name'}),title,el('label',{'for':'td',text:'Beschreibung'}),desc,
+until=el('input',{type:'date',value:dayToDate(f.until),id:'tu'}),conf=el('input',{type:'checkbox',checked:f.confirm,id:'tc'}),week=el('input',{type:'checkbox',checked:f.weekend}),on=el('input',{type:'checkbox',checked:f.active});desc.value=f.desc;
+var cat=el('select',{id:'tk'});cats.forEach(function(k,i){var o=el('option',{raw:catLabel(i),value:i});if(i==f.cat)o.selected=true;cat.appendChild(o);});
+var rep=el('select',{id:'tr'});repeats.forEach(function(k,i){var o=el('option',{text:k,value:i});if(i==f.rep)o.selected=true;rep.appendChild(o);});
+var row=el('div',{'class':'days'}),ages=el('div',{'class':'days'}),who=el('div',{'class':'days'}),ageMask=f.ages;
+function paint(){row.textContent='';row.hidden=rep.value!='2';dayNames.forEach(function(n,i){row.appendChild(el('button',{'class':days&(1<<i)?'':'off',raw:n,on:function(){days^=1<<i;paint();}}));});
+ages.textContent='';[1,2,4].forEach(function(b){ages.appendChild(el('button',{'class':ageMask&b?'':'off',raw:agesText(b),on:function(){ageMask^=b;paint();}}));});
+who.textContent='';data.children.forEach(function(k){who.appendChild(el('button',{'class':picked.indexOf(k.id)>=0?'':'off',raw:k.name,on:function(){var i=picked.indexOf(k.id);if(i>=0)picked.splice(i,1);else picked.push(k.id);paint();}}));});}
+rep.onchange=paint;paint();
+root.appendChild(el('section',{},[el('h2',{raw:f.id?t('Aufgabe bearbeiten'):t('Neue Aufgabe')}),
+el('label',{'for':'tt',text:'Name'}),title,el('label',{'for':'tk',text:'Kategorie'}),cat,el('label',{'for':'td',text:'Beschreibung'}),desc,
 el('label',{'for':'tm',text:'Zusätzliche Minuten'}),mins,
-el('label',{text:'Wiederholung (kein Tag gewählt = einmalig)'}),row,
+f.id?null:el('label',{text:'Für diese Kinder'}),f.id?null:who,
+el('label',{text:'Empfohlene Altersgruppe'}),ages,
+el('label',{'for':'tr',text:'Wiederholung'}),rep,row,
+el('label',{'class':'check'},[week,el('span',{text:'Am Wochenende verfügbar'})]),
 el('label',{'for':'tu',text:'Gültig bis (leer = unbegrenzt)'}),until,
+el('label',{'class':'check'},[on,el('span',{text:'Aufgabe aktiv'})]),
 el('label',{'class':'check'},[conf,el('span',{text:'Elternbestätigung nötig'})]),
 el('p',{'class':'muted',text:'Ohne Bestätigung bekommt das Kind die Minuten sofort beim Melden.'}),
-el('div',{'class':'row'},[el('button',{text:'Speichern',on:function(){editing=null;act({a:'task',id:c.id,task:f.id,title:title.value,desc:desc.value,minutes:mins.value||0,days:days,until:dateToDay(until.value),confirm:conf.checked?1:0});}}),
+el('div',{'class':'row'},[el('button',{text:'Speichern',on:function(){if(!f.id&&!picked.length){alert(t('Bitte mindestens ein Kind wählen'));return;}editing=null;act({a:'task',id:f.id?c.id:picked[0],task:f.id,title:title.value,desc:desc.value,minutes:mins.value||0,days:days,rep:rep.value,cat:cat.value,ages:ageMask,weekend:week.checked?1:0,active:on.checked?1:0,until:dateToDay(until.value),confirm:conf.checked?1:0,kids:picked.join(',')});}}),
 el('button',{'class':'off',text:'Abbrechen',on:function(){editing=null;render();}})])]));
 }
 function num(id,label,value){return [el('label',{'for':id,text:label}),el('input',{id:id,type:'number',min:'0',max:'1440',value:value})];}
+var openDay=-1,copyMask=0;
+function dayText(d){return d.on?d.base+' '+t('Min.')+' · '+clock(d.from)+'–'+clock(d.to)+' · +'+d.extra:t('fernsehfrei');}
+function dayForm(s,c,i){var d=c.week[i];
+var on=el('input',{type:'checkbox',checked:d.on}),base=num('db','Grundzeit (Minuten)',d.base),extra=num('de','Maximale Zusatzzeit (Minuten)',d.extra),from=el('input',{type:'time',id:'df',value:clock(d.from)}),to=el('input',{type:'time',id:'dt',value:clock(d.to)});
+s.appendChild(el('label',{'class':'check'},[on,el('span',{text:'TV an diesem Tag aktiv'})]));base.forEach(function(x){s.appendChild(x)});
+s.appendChild(el('label',{'for':'df',text:'TV-Start'}));s.appendChild(from);s.appendChild(el('label',{'for':'dt',text:'TV-Ende'}));s.appendChild(to);extra.forEach(function(x){s.appendChild(x)});
+s.appendChild(el('p',{},[el('button',{text:'Speichern',on:function(){act({a:'week',id:c.id,v:i,on:on.checked?1:0,base:base[1].value||0,extra:extra[1].value||0,from:minutes(from.value),to:minutes(to.value)})}})]));
+var row=el('div',{'class':'days'});function paint(){row.textContent='';dayNames.forEach(function(n,k){if(k!=i)row.appendChild(el('button',{'class':copyMask&(1<<k)?'':'off',raw:n,on:function(){copyMask^=1<<k;paint();}}));});}paint();
+s.appendChild(el('label',{text:'Auf andere Tage kopieren'}));s.appendChild(row);
+s.appendChild(el('p',{},[el('button',{'class':'off',text:'Kopieren',on:function(){if(copyMask){var m=copyMask;copyMask=0;act({a:'daycopy',id:c.id,v:i,to:m});}}})]));}
 function vTime(root){
 root.appendChild(kidTabs());var c=kid();
 var on=el('input',{type:'checkbox',checked:c.timeOn}),carry=el('input',{type:'checkbox',checked:c.carry});
-var from=el('input',{type:'time',id:'af',value:clock(c.bedTo)}),to=el('input',{type:'time',id:'at',value:clock(c.bedFrom)});
 root.appendChild(el('section',{},[el('h2',{text:'Heute'}),el('p',{'class':'muted',raw:c.timeOn?(t('Verfügbar ')+c.available+' '+t('Min.')+t(', genutzt ')+c.usedMin+' '+t('Min.')+t(', noch ')+c.left+' '+t('Min.')+t(', heute verdient ')+c.extra+' '+t('Min.')):t('Kein Zeitkonto: Medienzeit ist unbegrenzt. Genutzt: ')+c.usedMin+' '+t('Min.')})]));
-var fields=[].concat(num('b','Grundzeit pro Tag (Minuten)',c.base),num('e','Maximale Zusatzzeit (0 = keine Grenze)',c.maxExtra),num('t','Maximale Tageszeit (0 = keine Grenze)',c.maxTotal));
-root.appendChild(el('section',{},[el('h2',{text:'Medienzeitkonto'}),el('label',{'class':'check'},[on,el('span',{text:'Zeitkonto ein'})])].concat(fields,[
+root.appendChild(el('section',{},[el('h2',{text:'Medienzeitkonto'}),el('label',{'class':'check'},[on,el('span',{text:'Zeitkonto ein'})]),
 el('label',{'class':'check'},[carry,el('span',{text:'Ungenutzte Zusatzminuten mitnehmen'})]),
-el('p',{},[el('button',{text:'Speichern',on:function(){act({a:'time',id:c.id,on:on.checked?1:0,carry:carry.checked?1:0,base:fields[1].value||0,extra:fields[3].value||0,total:fields[5].value||0})}})])])));
-root.appendChild(el('section',{},[el('h2',{text:'Mediennutzung erlaubt'}),el('label',{'for':'af',text:'Von'}),from,el('label',{'for':'at',text:'Bis'}),to,
-el('div',{'class':'row'},[el('button',{text:'Speichern',on:function(){if(from.value&&to.value)act({a:'bed',id:c.id,from:minutes(to.value),to:minutes(from.value)})}}),el('button',{'class':'off',text:'Immer erlaubt',on:function(){act({a:'bed',id:c.id,from:-1,to:-1})}})])]));
+el('p',{},[el('button',{text:'Speichern',on:function(){act({a:'time',id:c.id,on:on.checked?1:0,carry:carry.checked?1:0})}})])]));
+var w=el('section',{},[el('h2',{text:'Medienzeiten'}),el('p',{'class':'muted',text:'Das Zeitfenster gilt immer, auch wenn noch Minuten übrig sind.'})]);
+dayLong.forEach(function(n,i){w.appendChild(el('div',{'class':'row'},[el('span',{raw:t(n)+' · '+dayText(c.week[i])}),el('button',{'class':'off',text:openDay==i?'Schließen':'Ändern',on:function(){openDay=openDay==i?-1:i;copyMask=0;render();}})]));
+if(openDay==i)dayForm(w,c,i);});
+root.appendChild(w);
+if(data.children.length>1){var k=el('section',{},[el('h2',{text:'Auf anderes Kind kopieren'}),el('p',{'class':'muted',text:'Kopiert die Werte einmalig. Spätere Änderungen gelten nur für das jeweilige Kind.'})]);
+data.children.forEach(function(o){if(o.id!=c.id)k.appendChild(el('p',{},[el('button',{'class':'off',raw:'→ '+o.name,on:function(){if(confirm(t('Wochenzeiten überschreiben?')))act({a:'kidcopy',id:c.id,target:o.id})}})]));});root.appendChild(k);}
 var amount=el('input',{type:'number',id:'cm',placeholder:'Minuten, zum Beispiel 15 oder -10'}),note=el('input',{id:'cn',maxlength:'60',placeholder:'Grund'});
 root.appendChild(el('section',{},[el('h2',{text:'Zeit korrigieren'}),el('p',{'class':'muted',text:'Das Tagesmaximum gilt auch hier.'}),el('label',{'for':'cm',text:'Minuten'}),amount,el('label',{'for':'cn',text:'Grund'}),note,
 el('p',{},[el('button',{text:'Buchen',on:function(){if(amount.value)act({a:'correct',id:c.id,v:amount.value,note:note.value||t('Korrektur')})}})])]));
@@ -153,9 +193,10 @@ root.appendChild(l);
 }
 function vKids(root){
 root.appendChild(kidTabs());var c=kid();
-var name=el('input',{value:c.name,maxlength:'20','aria-label':'Name'});
+var name=el('input',{value:c.name,maxlength:'20','aria-label':'Name'}),ageIn=el('input',{id:'ka',type:'number',min:'0',max:'18',value:c.age||''});
 root.appendChild(el('section',{},[el('h2',{text:'Kind'}),name,
-el('div',{'class':'row'},[el('button',{text:'Name speichern',on:function(){act({a:'name',id:c.id,name:name.value})}}),el('button',{'class':'off',text:'Avatar wechseln',on:function(){act({a:'avatar',id:c.id})}})]),
+el('label',{'for':'ka',text:'Alter (für den Vorschlag der Altersgruppe)'}),ageIn,
+el('div',{'class':'row'},[el('button',{text:'Speichern',on:function(){act({a:'name',id:c.id,name:name.value});act({a:'age',id:c.id,v:ageIn.value||0})}}),el('button',{'class':'off',text:'Avatar wechseln',on:function(){act({a:'avatar',id:c.id})}})]),
 data.children.length>1?el('p',{},[el('button',{'class':'danger',text:'Profil löschen',on:function(){if(confirm(c.name+t(' wirklich löschen?'))){current=null;act({a:'delete',id:c.id})}}})]):null]));
 var n=el('input',{maxlength:'20',placeholder:'Name','aria-label':'Name des neuen Kindes'});
 root.appendChild(el('section',{},[el('h2',{text:'Neues Kind'}),n,el('p',{},[el('button',{text:'Anlegen',on:function(){if(n.value.trim())act({a:'add',name:n.value})}})])]));

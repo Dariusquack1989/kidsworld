@@ -32,10 +32,10 @@
     <string name="sc_parent_apps_hint3">OK: aktivieren oder deaktivieren  ·  ▶ Favorit  ·  ◀ kostenlos (ohne Medienzeit)</string>
     <string name="sc_parent_calm_on">Ruhige Animationen: an</string>
     <string name="sc_parent_calm_off">Ruhige Animationen: aus</string>
-    <string name="sc_parent_limit">Grundzeit: %1$d Minuten</string>
+    <string name="sc_parent_limit">Grundzeit heute: %1$d Minuten</string>
     <string name="sc_parent_limit_off">Zeitkonto: aus</string>
-    <string name="sc_parent_bed">Schlafenszeit: %1$02d:%2$02d bis %3$02d:%4$02d</string>
-    <string name="sc_parent_bed_off">Schlafenszeit: aus</string>
+    <string name="sc_parent_bed">Fernsehen heute: %1$02d:%2$02d bis %3$02d:%4$02d</string>
+    <string name="sc_parent_bed_off">Fernsehen heute: ganztags</string>
     <string name="sc_parent_bonus">Heute 30 Minuten dazu</string>
     <string name="sc_parent_used">Heute genutzt: %1$d Minuten</string>
     <string name="sc_parent_phone">Handy-Steuerung im selben WLAN: %1$s</string>
@@ -59,6 +59,7 @@
     <string name="sc_err_no_child">Kind nicht gefunden</string>
     <string name="sc_err_app_denied">App nicht erlaubt</string>
     <string name="sc_err_no_app">App fehlt</string>
+    <string name="sc_err_window">Das Ende muss nach dem Start liegen</string>
     <string name="sc_err_task_name">Die Aufgabe braucht einen Namen</string>
     <string name="sc_log_correction">Korrektur</string>
     <string name="sc_log_carry">Übertrag von gestern</string>

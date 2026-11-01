@@ -13,6 +13,7 @@ import com.gathin.tvhome.R;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 
 /**
  * Aufgaben, Bestätigungen, Nutzungszeit und Protokoll in einer Datenbank. Gutschriften laufen als Transaktion, und
@@ -31,7 +32,9 @@ public final class KidsDb extends SQLiteOpenHelper {
         public long id, runId;
         public String kid, title, description, status = OPEN, reason;
         public int minutes, days, until, createdDay, credited;
-        public boolean confirm;
+        public int category = TaskCatalog.SPECIAL, ages = TaskCatalog.AGE_ALL, repeat = KidsCalendar.DAILY;
+        public boolean confirm, weekend = true, active = true;
+        public long markedAt;
         /** Heute dran; sonst steht die Aufgabe nur in der Liste und lässt sich nicht melden. */
         public boolean today;
     }
@@ -53,7 +56,7 @@ public final class KidsDb extends SQLiteOpenHelper {
     private final Context app;
 
     private KidsDb(Context ctx) {
-        super(ctx.getApplicationContext(), "kids.db", null, 1);
+        super(ctx.getApplicationContext(), "kids.db", null, 2);
         clock = ctx.getApplicationContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         app = ctx.getApplicationContext();
     }
@@ -67,9 +70,12 @@ public final class KidsDb extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE task(id INTEGER PRIMARY KEY, kid TEXT NOT NULL, title TEXT NOT NULL, description TEXT,"
                 + " minutes INTEGER NOT NULL, days INTEGER NOT NULL, until INTEGER NOT NULL, created_day INTEGER NOT NULL,"
-                + " confirm INTEGER NOT NULL, deleted INTEGER NOT NULL DEFAULT 0)");
+                + " confirm INTEGER NOT NULL, deleted INTEGER NOT NULL DEFAULT 0, category INTEGER NOT NULL DEFAULT 3,"
+                + " ages INTEGER NOT NULL DEFAULT 7, rep INTEGER NOT NULL DEFAULT 1, weekend INTEGER NOT NULL DEFAULT 1,"
+                + " active INTEGER NOT NULL DEFAULT 1)");
         db.execSQL("CREATE TABLE task_run(id INTEGER PRIMARY KEY, task_id INTEGER NOT NULL, day INTEGER NOT NULL,"
-                + " status TEXT NOT NULL, reason TEXT, marked_at INTEGER, decided_at INTEGER, UNIQUE(task_id, day))");
+                + " status TEXT NOT NULL, reason TEXT, marked_at INTEGER, decided_at INTEGER, title_then TEXT, minutes_then INTEGER,"
+                + " UNIQUE(task_id, day))");
         db.execSQL("CREATE TABLE ledger(id INTEGER PRIMARY KEY, kid TEXT NOT NULL, day INTEGER NOT NULL,"
                 + " minutes INTEGER NOT NULL, kind TEXT NOT NULL, run_id INTEGER UNIQUE, note TEXT, time INTEGER NOT NULL)");
         db.execSQL("CREATE TABLE usage_day(kid TEXT NOT NULL, day INTEGER NOT NULL, ms INTEGER NOT NULL,"
@@ -79,12 +85,21 @@ public final class KidsDb extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int from, int to) {
+        if (from < 2) {
+            // Nur neue Spalten: Vorhandene Aufgaben, Läufe und Buchungen bleiben, wie sie sind.
+            db.execSQL("ALTER TABLE task ADD COLUMN category INTEGER NOT NULL DEFAULT 3");
+            db.execSQL("ALTER TABLE task ADD COLUMN ages INTEGER NOT NULL DEFAULT 7");
+            db.execSQL("ALTER TABLE task ADD COLUMN rep INTEGER NOT NULL DEFAULT 1");
+            db.execSQL("ALTER TABLE task ADD COLUMN weekend INTEGER NOT NULL DEFAULT 1");
+            db.execSQL("ALTER TABLE task ADD COLUMN active INTEGER NOT NULL DEFAULT 1");
+            db.execSQL("UPDATE task SET rep = CASE days WHEN 0 THEN 0 WHEN 127 THEN 1 ELSE 2 END");
+            db.execSQL("ALTER TABLE task_run ADD COLUMN title_then TEXT");
+            db.execSQL("ALTER TABLE task_run ADD COLUMN minutes_then INTEGER");
+        }
     }
 
     private static int wallDay() {
-        Calendar c = Calendar.getInstance();
-        long local = c.getTimeInMillis() + c.get(Calendar.ZONE_OFFSET) + c.get(Calendar.DST_OFFSET);
-        return (int) Math.floorDiv(local, KidsCalendar.DAY_MS);
+        return KidsCalendar.localDay(System.currentTimeMillis(), TimeZone.getDefault());
     }
 
     /** Der heutige Tag; merkt sich den höchsten und protokolliert verstellte Uhren. */
@@ -146,8 +161,8 @@ public final class KidsDb extends SQLiteOpenHelper {
             if (c.moveToFirst()) return;
         }
         Account y = accountOn(p.id, day - 1);
-        int carry = MediaTime.carry(p, y.extra, y.sum, y.usedMs);
-        carry = MediaTime.creditable(p, carry, 0, 0);
+        int carry = MediaTime.carry(p.onDay(KidsCalendar.weekday(day - 1)), y.extra, y.sum, y.usedMs);
+        carry = MediaTime.creditable(p.onDay(KidsCalendar.weekday(day)), carry, 0, 0);
         log(p.id, day, carry, CARRY, app.getString(R.string.sc_log_carry));
     }
 
@@ -162,7 +177,7 @@ public final class KidsDb extends SQLiteOpenHelper {
     /** Korrektur von Hand; gebucht wird, was das Tagesmaximum zulässt. Ergibt die gebuchten Minuten. */
     public synchronized int correct(KidsProfile p, int minutes, String note) {
         Account a = account(p);
-        int real = MediaTime.correctable(p, minutes, a.sum);
+        int real = MediaTime.correctable(p.onDay(KidsCalendar.weekday(today())), minutes, a.sum);
         if (real != 0) {
             log(p.id, today(), real, CORRECTION, real == minutes ? note : app.getString(R.string.sc_log_capped, note, minutes));
         }
@@ -213,6 +228,11 @@ public final class KidsDb extends SQLiteOpenHelper {
         v.put("days", t.days);
         v.put("until", t.until);
         v.put("confirm", t.confirm ? 1 : 0);
+        v.put("category", t.category);
+        v.put("ages", t.ages);
+        v.put("rep", t.repeat);
+        v.put("weekend", t.weekend ? 1 : 0);
+        v.put("active", t.active ? 1 : 0);
         SQLiteDatabase db = getWritableDatabase();
         if (t.id > 0) {
             db.update("task", v, "id=?", new String[]{String.valueOf(t.id)});
@@ -220,6 +240,12 @@ public final class KidsDb extends SQLiteOpenHelper {
         }
         v.put("created_day", today());
         return db.insert("task", null, v);
+    }
+
+    public synchronized void setTaskActive(long id, boolean on) {
+        ContentValues v = new ContentValues();
+        v.put("active", on ? 1 : 0);
+        getWritableDatabase().update("task", v, "id=?", new String[]{String.valueOf(id)});
     }
 
     /** Erledigte Aufgaben bleiben fürs Protokoll erhalten, sie werden nur nicht mehr gezeigt. */
@@ -235,20 +261,23 @@ public final class KidsDb extends SQLiteOpenHelper {
         getWritableDatabase().update("task", v, "kid=?", new String[]{kid});
     }
 
-    /** Eine einmalige Aufgabe hat nur einen Lauf (Tag 0), eine wiederkehrende einen je Tag. */
-    private static int runDay(int days, int day) {
-        return days == 0 ? 0 : day;
+    /** Gültige Aufgaben eines Kindes mit ihrem Stand, auch an freien Wochentagen; einmalige verschwinden am Tag nach der Bestätigung. */
+    public List<Task> tasks(String kid) {
+        return tasks(kid, false);
     }
 
-    /** Gültige Aufgaben eines Kindes mit ihrem Stand, auch an freien Wochentagen; einmalige verschwinden am Tag nach der Bestätigung. */
-    public synchronized List<Task> tasks(String kid) {
+    /** Wie {@link #tasks(String)}; mit {@code all} auch die deaktivierten, für die Eltern. */
+    public synchronized List<Task> tasks(String kid, boolean all) {
         int day = today();
         List<Task> out = new ArrayList<>();
         try (Cursor c = getReadableDatabase().rawQuery("SELECT t.id, t.title, t.description, t.minutes, t.days, t.until,"
-                + " t.created_day, t.confirm, r.id, r.status, r.reason, r.decided_at, r.day, l.minutes"
-                + " FROM task t LEFT JOIN task_run r ON r.task_id = t.id AND r.day = CASE t.days WHEN 0 THEN 0 ELSE ? END"
+                + " t.created_day, t.confirm, r.id, r.status, r.reason, r.decided_at, r.day, l.minutes,"
+                + " t.category, t.ages, t.rep, t.weekend, t.active"
+                + " FROM task t LEFT JOIN task_run r ON r.task_id = t.id"
+                + " AND r.day = CASE t.rep WHEN 0 THEN 0 WHEN 3 THEN ? ELSE ? END"
                 + " LEFT JOIN ledger l ON l.run_id = r.id"
-                + " WHERE t.kid = ? AND t.deleted = 0 ORDER BY t.id", new String[]{String.valueOf(day), kid})) {
+                + " WHERE t.kid = ? AND t.deleted = 0 ORDER BY t.category, t.id",
+                new String[]{String.valueOf(KidsCalendar.period(KidsCalendar.WEEKLY, day)), String.valueOf(day), kid})) {
             while (c.moveToNext()) {
                 Task t = new Task();
                 t.id = c.getLong(0);
@@ -266,9 +295,15 @@ public final class KidsDb extends SQLiteOpenHelper {
                     t.reason = c.getString(10);
                 }
                 t.credited = c.isNull(13) ? 0 : c.getInt(13);
-                t.today = KidsCalendar.due(t.days, t.createdDay, t.until, day);
+                t.category = c.getInt(14);
+                t.ages = c.getInt(15);
+                t.repeat = c.getInt(16);
+                t.weekend = c.getInt(17) != 0;
+                t.active = c.getInt(18) != 0;
+                if (!t.active && !all) continue;
+                t.today = t.active && KidsCalendar.available(t.repeat, t.days, t.weekend, t.createdDay, t.until, day);
                 if (!KidsCalendar.active(t.createdDay, t.until, day) && t.runId == 0) continue;
-                if (t.days == 0 && DONE.equals(t.status) && !c.isNull(11) && dayOf(c.getLong(11)) < day) continue;
+                if (t.repeat == KidsCalendar.ONCE && DONE.equals(t.status) && !c.isNull(11) && dayOf(c.getLong(11)) < day) continue;
                 out.add(t);
             }
         }
@@ -285,7 +320,8 @@ public final class KidsDb extends SQLiteOpenHelper {
     /** Alle wartenden Bestätigungen. */
     public synchronized List<Task> waiting() {
         List<Task> out = new ArrayList<>();
-        try (Cursor c = getReadableDatabase().rawQuery("SELECT r.id, t.id, t.kid, t.title, t.minutes FROM task_run r"
+        try (Cursor c = getReadableDatabase().rawQuery("SELECT r.id, t.id, t.kid, COALESCE(r.title_then, t.title),"
+                + " COALESCE(r.minutes_then, t.minutes), r.marked_at, t.category FROM task_run r"
                 + " JOIN task t ON t.id = r.task_id WHERE r.status = ? ORDER BY r.marked_at", new String[]{WAITING})) {
             while (c.moveToNext()) {
                 Task t = new Task();
@@ -294,6 +330,8 @@ public final class KidsDb extends SQLiteOpenHelper {
                 t.kid = c.getString(2);
                 t.title = c.getString(3);
                 t.minutes = c.getInt(4);
+                t.markedAt = c.getLong(5);
+                t.category = c.getInt(6);
                 t.status = WAITING;
                 out.add(t);
             }
@@ -310,19 +348,22 @@ public final class KidsDb extends SQLiteOpenHelper {
         SQLiteDatabase db = getWritableDatabase();
         db.beginTransaction();
         try {
-            int days, minutes;
+            int minutes, repeat;
             boolean confirm;
             String title;
-            try (Cursor c = db.rawQuery("SELECT days, minutes, confirm, title FROM task WHERE id=? AND kid=? AND deleted=0",
+            try (Cursor c = db.rawQuery("SELECT days, minutes, confirm, title, rep, weekend, created_day, until, active"
+                    + " FROM task WHERE id=? AND kid=? AND deleted=0",
                     new String[]{String.valueOf(taskId), p.id})) {
                 if (!c.moveToFirst()) return false;
-                days = c.getInt(0);
-                if (days != 0 && (days & (1 << KidsCalendar.weekday(day))) == 0) return false;
+                repeat = c.getInt(4);
+                if (c.getInt(8) == 0 || !KidsCalendar.available(repeat, c.getInt(0), c.getInt(5) != 0, c.getInt(6), c.getInt(7), day)) {
+                    return false;
+                }
                 minutes = c.getInt(1);
                 confirm = c.getInt(2) != 0;
                 title = c.getString(3);
             }
-            int rd = runDay(days, day);
+            int rd = KidsCalendar.period(repeat, day);
             ContentValues v = new ContentValues();
             v.put("task_id", taskId);
             v.put("day", rd);
@@ -331,6 +372,8 @@ public final class KidsDb extends SQLiteOpenHelper {
             ContentValues u = new ContentValues();
             u.put("status", WAITING);
             u.put("marked_at", System.currentTimeMillis());
+            u.put("title_then", title);
+            u.put("minutes_then", minutes);
             u.putNull("reason");
             int changed = db.update("task_run", u, "task_id=? AND day=? AND status IN (?,?)",
                     new String[]{String.valueOf(taskId), String.valueOf(rd), OPEN, REJECTED});
@@ -356,7 +399,8 @@ public final class KidsDb extends SQLiteOpenHelper {
         try {
             String kid, title;
             int minutes;
-            try (Cursor c = db.rawQuery("SELECT t.kid, t.minutes, t.title FROM task_run r JOIN task t ON t.id = r.task_id"
+            try (Cursor c = db.rawQuery("SELECT t.kid, COALESCE(r.minutes_then, t.minutes), COALESCE(r.title_then, t.title)"
+                    + " FROM task_run r JOIN task t ON t.id = r.task_id"
                     + " WHERE r.id=? AND r.status=?", new String[]{String.valueOf(runId), WAITING})) {
                 if (!c.moveToFirst()) return -1;
                 kid = c.getString(0);
@@ -381,7 +425,7 @@ public final class KidsDb extends SQLiteOpenHelper {
         u.put("decided_at", System.currentTimeMillis());
         db.update("task_run", u, "id=?", new String[]{String.valueOf(runId)});
         Account a = accountOn(p.id, day);
-        int real = MediaTime.creditable(p, minutes, a.extra, a.sum);
+        int real = MediaTime.creditable(p.onDay(KidsCalendar.weekday(day)), minutes, a.extra, a.sum);
         ContentValues v = new ContentValues();
         v.put("kid", p.id);
         v.put("day", day);

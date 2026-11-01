@@ -32,19 +32,24 @@ public final class KidsGate {
         if (r != null) r.run();
     }
 
-    private static int minuteNow() {
+    public static int minuteNow() {
         Calendar c = Calendar.getInstance();
         return c.get(Calendar.HOUR_OF_DAY) * 60 + c.get(Calendar.MINUTE);
+    }
+
+    /** Die Regeln des Kindes am heutigen Wochentag. */
+    public KidsProfile rulesToday(KidsProfile p) {
+        return p.onDay(KidsCalendar.weekday(db.today()));
     }
 
     /** Restminuten des Kindes, -1 ohne Zeitkonto. */
     public int minutesLeft(KidsProfile p) {
         KidsDb.Account a = db.account(p);
-        return MediaTime.left(p, a.sum, a.usedMs);
+        return MediaTime.left(rulesToday(p), a.sum, a.usedMs);
     }
 
     public int available(KidsProfile p) {
-        return MediaTime.available(p, db.account(p).sum);
+        return MediaTime.available(rulesToday(p), db.account(p).sum);
     }
 
     public boolean lockedNow() {
@@ -58,7 +63,7 @@ public final class KidsGate {
     /** Warum das aktive Kind gerade nichts Zählendes starten darf. */
     public KidsTime.Block block() {
         KidsProfile p = profiles.active();
-        return KidsTime.block(lockedNow(), minuteNow(), p, minutesLeft(p));
+        return KidsTime.block(lockedNow(), minuteNow(), rulesToday(p), minutesLeft(p));
     }
 
     /** Darf diese App jetzt laufen? Apps ohne Medienzeit sind nur von Sperre und Ruhezeit betroffen. */

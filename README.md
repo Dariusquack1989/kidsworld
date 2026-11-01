@@ -25,9 +25,10 @@ The GIF and the world and task pictures come from a waipu tv stick. The parent a
 ## What it does
 
 - Child profiles, each with its own allowed apps and favourites.
-- Daily screen time, bedtime and a parent PIN.
-- Tasks: one-off or on chosen weekdays, with extra minutes and optional parent confirmation. Credits are stored once
-  per task and day, and the daily maximum is never exceeded.
+- A week plan per child: base time, TV start and end, extra time and screen-free days for each weekday, with a parent PIN.
+- A catalogue of 40 tasks in four categories, plus your own. Tasks can be once, daily, on chosen weekdays, weekly or
+  when needed, and earn extra minutes after parent confirmation. Each period gives one credit, and the daily maximum is
+  never exceeded.
 - Apps that count against screen time, or apps a parent marks as free.
 - A web page for the parent's phone on the home network (port 8686): confirm tasks, change time, see usage, send a
   message to the TV. A phone pairs once with a code shown on the TV.
@@ -102,7 +103,7 @@ No accounts, telemetry, ads or analytics. Data stays on the TV.
 - Time counts while a counted app is in front, including a paused video.
 - The stick cannot always tell that the TV is off. Without HDMI-CEC it stays awake, the app keeps playing and the time
   keeps counting when only the TV is switched off.
-- A clock set back gives no new day. A clock set forward starts a new day, and that day then stays until the real date
+- The time window follows the device clock. A clock set back gives no new day. A clock set forward starts a new day, and that day then stays until the real date
   catches up. Settings stay behind the PIN for that reason.
 - Removing the app deletes all its data.
 

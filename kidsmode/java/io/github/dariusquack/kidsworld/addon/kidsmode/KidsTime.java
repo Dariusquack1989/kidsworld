@@ -2,8 +2,11 @@ package io.github.dariusquack.kidsworld.addon.kidsmode;
 
 /** Wann Mediennutzung erlaubt ist. Reine Logik, testbar. */
 public final class KidsTime {
-    /** LIMIT sperrt nur zählende Apps; BEDTIME (außerhalb der erlaubten Zeit) und LOCKED sperren alles. */
-    public enum Block { NONE, LIMIT, BEDTIME, LOCKED }
+    /**
+     * LIMIT sperrt nur zählende Apps. WINDOW (außerhalb des Zeitfensters oder fernsehfreier Tag) sperrt alle Apps, die
+     * Aufgaben bleiben erreichbar. BEDTIME und LOCKED sperren die ganze Startseite.
+     */
+    public enum Block { NONE, LIMIT, WINDOW, BEDTIME, LOCKED }
 
     private KidsTime() {}
 
@@ -17,6 +20,7 @@ public final class KidsTime {
     public static Block block(boolean locked, int minute, KidsProfile p, int left) {
         if (locked) return Block.LOCKED;
         if (inBedtime(minute, p.bedFrom, p.bedTo)) return Block.BEDTIME;
+        if (!p.tvOn || minute < p.tvFrom || minute >= p.tvTo) return Block.WINDOW;
         return left == 0 ? Block.LIMIT : Block.NONE;
     }
 }

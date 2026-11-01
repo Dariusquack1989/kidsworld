@@ -372,6 +372,19 @@ public final class KidsRemote {
             field(b, "avatar", p != null ? p.avatarName() : "fuchs");
             field(b, "title", t.title);
             field(b, "minutes", t.minutes);
+            field(b, "marked", t.markedAt);
+            field(b, "cat", t.category);
+            close(b, '}');
+        }
+        close(b, ']');
+        String language = KidsLanguage.shown(ctx);
+        b.append("\"catalog\":[");
+        for (TaskCatalog.Entry e : TaskCatalog.all()) {
+            b.append('{');
+            field(b, "title", e.title(language));
+            field(b, "cat", e.category);
+            field(b, "ages", e.ages);
+            field(b, "minutes", e.minutes);
             close(b, '}');
         }
         close(b, ']');
@@ -397,26 +410,35 @@ public final class KidsRemote {
 
     private void child(StringBuilder b, KidsProfile p) {
         KidsDb.Account a = db.account(p);
+        KidsProfile today = gate.rulesToday(p);
         b.append('{');
         field(b, "id", p.id);
         field(b, "name", p.name);
         field(b, "avatar", p.avatarName());
         field(b, "timeOn", p.timeOn);
-        field(b, "base", p.baseMin);
-        field(b, "maxExtra", p.maxExtraMin);
-        field(b, "maxTotal", p.maxTotalMin);
         field(b, "carry", p.carryOver);
-        field(b, "bedFrom", p.bedFrom);
-        field(b, "bedTo", p.bedTo);
-        field(b, "available", MediaTime.available(p, a.sum));
+        field(b, "age", p.age);
+        field(b, "group", TaskCatalog.ageGroup(p.age));
+        field(b, "available", MediaTime.available(today, a.sum));
         field(b, "usedMin", a.usedMs / 60_000);
-        field(b, "left", MediaTime.left(p, a.sum, a.usedMs));
+        field(b, "left", MediaTime.left(today, a.sum, a.usedMs));
         field(b, "extra", a.extra);
+        b.append("\"week\":[");
+        for (KidsProfile.Day d : p.week()) {
+            b.append('{');
+            field(b, "on", d.on);
+            field(b, "base", d.base);
+            field(b, "from", d.from);
+            field(b, "to", d.to);
+            field(b, "extra", d.extra);
+            close(b, '}');
+        }
+        close(b, ']');
         b.append("\"days\":[");
         for (int m : db.usageDays(p.id, USAGE_DAYS)) b.append(m).append(',');
         close(b, ']');
         b.append("\"tasks\":[");
-        for (KidsDb.Task t : db.tasks(p.id)) {
+        for (KidsDb.Task t : db.tasks(p.id, true)) {
             b.append('{');
             field(b, "id", t.id);
             field(b, "title", t.title);
@@ -427,6 +449,11 @@ public final class KidsRemote {
             field(b, "confirm", t.confirm);
             field(b, "status", t.status);
             field(b, "today", t.today);
+            field(b, "cat", t.category);
+            field(b, "ages", t.ages);
+            field(b, "rep", t.repeat);
+            field(b, "weekend", t.weekend);
+            field(b, "active", t.active);
             field(b, "reason", t.reason != null ? t.reason : "");
             close(b, '}');
         }
@@ -487,6 +514,9 @@ public final class KidsRemote {
             case "reject":
                 String reason = RemoteText.limited(q.containsKey("reason") ? q.get("reason") : "", MAX_MESSAGE);
                 return db.reject(RemoteText.number(q.get("run"), 0), reason) ? null : ctx.getString(R.string.sc_err_decided);
+            case "taskactive":
+                db.setTaskActive(RemoteText.number(q.get("task"), 0), "1".equals(q.get("v")));
+                return null;
             case "taskdel":
                 db.deleteTask(RemoteText.number(q.get("task"), 0));
                 return null;
@@ -518,16 +548,37 @@ public final class KidsRemote {
                 break;
             case "time":
                 p.timeOn = "1".equals(q.get("on"));
-                p.baseMin = clamp(RemoteText.number(q.get("base"), 0), MINUTES_PER_DAY);
-                p.maxExtraMin = clamp(RemoteText.number(q.get("extra"), 0), MINUTES_PER_DAY);
-                p.maxTotalMin = clamp(RemoteText.number(q.get("total"), 0), MINUTES_PER_DAY);
                 p.carryOver = "1".equals(q.get("carry"));
+                if (q.containsKey("base")) {
+                    // Ein Wert für die ganze Woche.
+                    p.baseMin = clamp(RemoteText.number(q.get("base"), 0), MINUTES_PER_DAY);
+                    p.maxExtraMin = clamp(RemoteText.number(q.get("extra"), 0), MINUTES_PER_DAY);
+                    p.maxTotalMin = clamp(RemoteText.number(q.get("total"), 0), MINUTES_PER_DAY);
+                    p.resetWeek();
+                }
                 break;
-            case "bed":
-                int from = RemoteText.number(q.get("from"), -1), to = RemoteText.number(q.get("to"), -1);
-                boolean ok = from >= 0 && from < MINUTES_PER_DAY && to >= 0 && to < MINUTES_PER_DAY;
-                p.bedFrom = ok ? from : -1;
-                p.bedTo = ok ? to : -1;
+            case "week":
+                int from = clamp(RemoteText.number(q.get("from"), 0), MINUTES_PER_DAY);
+                int to = clamp(RemoteText.number(q.get("to"), MINUTES_PER_DAY), MINUTES_PER_DAY);
+                if (to <= from) return ctx.getString(R.string.sc_err_window);
+                KidsProfile.Day d = p.week()[clamp(v, 6)];
+                d.on = "1".equals(q.get("on"));
+                d.base = clamp(RemoteText.number(q.get("base"), 0), MINUTES_PER_DAY);
+                d.extra = clamp(RemoteText.number(q.get("extra"), 0), MINUTES_PER_DAY);
+                d.from = from;
+                d.to = to;
+                break;
+            case "daycopy":
+                p.copyDay(clamp(v, 6), RemoteText.number(q.get("to"), 0));
+                break;
+            case "kidcopy":
+                KidsProfile target = profiles.byId(q.get("target"));
+                if (target == null) return ctx.getString(R.string.sc_err_no_child);
+                target.copyWeek(p);
+                profiles.save(target);
+                return null;
+            case "age":
+                p.age = clamp(v, 18);
                 break;
             case "correct":
                 String note = q.get("note");
@@ -565,9 +616,25 @@ public final class KidsRemote {
         t.description = RemoteText.limited(desc != null ? desc.trim() : "", MAX_MESSAGE);
         t.minutes = clamp(RemoteText.number(q.get("minutes"), 0), MINUTES_PER_DAY);
         t.days = clamp(RemoteText.number(q.get("days"), 0), 127);
+        t.repeat = q.containsKey("rep") ? clamp(RemoteText.number(q.get("rep"), 0), KidsCalendar.ON_DEMAND)
+                : t.days == 0 ? KidsCalendar.ONCE : t.days == 127 ? KidsCalendar.DAILY : KidsCalendar.WEEKDAYS;
+        t.category = clamp(RemoteText.number(q.get("cat"), TaskCatalog.SPECIAL), TaskCatalog.SPECIAL);
+        t.ages = clamp(RemoteText.number(q.get("ages"), TaskCatalog.AGE_ALL), TaskCatalog.AGE_ALL);
+        t.weekend = !"0".equals(q.get("weekend"));
+        t.active = !"0".equals(q.get("active"));
         t.until = Math.max(0, RemoteText.number(q.get("until"), 0));
         t.confirm = !"0".equals(q.get("confirm"));
         db.saveTask(t);
+        // Eine neue Aufgabe für mehrere Kinder wird je Kind eine eigene Aufgabe.
+        String others = q.get("kids");
+        if (t.id == 0 && others != null) {
+            for (String id : others.split(",")) {
+                KidsProfile other = profiles.byId(id);
+                if (other == null || other.id.equals(p.id)) continue;
+                t.kid = other.id;
+                db.saveTask(t);
+            }
+        }
         return null;
     }
 

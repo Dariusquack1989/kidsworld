@@ -1,8 +1,12 @@
 package io.github.dariusquack.kidsworld.addon.kidsmode;
 
+import java.util.TimeZone;
+
 /** Tage und Wiederholungen, ohne Android. Ein Tag ist die Zahl der Tage seit dem 1. Januar 1970. Testbar. */
 public final class KidsCalendar {
     public static final long DAY_MS = 86_400_000L;
+    /** Wiederholung einer Aufgabe. */
+    public static final int ONCE = 0, DAILY = 1, WEEKDAYS = 2, WEEKLY = 3, ON_DEMAND = 4;
     /** Ab dieser Abweichung zwischen Uhr und Laufzeit gilt die Uhr als verstellt. */
     private static final long JUMP_MS = 5 * 60_000L;
 
@@ -11,6 +15,33 @@ public final class KidsCalendar {
     /** 0 = Montag bis 6 = Sonntag; der 1. Januar 1970 war ein Donnerstag. */
     public static int weekday(int day) {
         return Math.floorMod(day + 3, 7);
+    }
+
+    /** Örtlicher Tag zu einem Zeitpunkt; Sommer- und Winterzeit stecken im Versatz der Zeitzone. */
+    public static int localDay(long time, TimeZone zone) {
+        return (int) Math.floorDiv(time + zone.getOffset(time), DAY_MS);
+    }
+
+    public static boolean weekend(int day) {
+        return weekday(day) >= 5;
+    }
+
+    /**
+     * Ist eine Aufgabe an diesem Tag verfügbar? {@code days} zählt nur bei {@link #WEEKDAYS}; {@code weekend} false
+     * nimmt Samstag und Sonntag aus, egal welche Wiederholung gilt.
+     */
+    public static boolean available(int repeat, int days, boolean weekend, int createdDay, int until, int day) {
+        if (!active(createdDay, until, day) || (!weekend && weekend(day))) return false;
+        return repeat != WEEKDAYS || (days & (1 << weekday(day))) != 0;
+    }
+
+    /**
+     * Zeitraum einer Aufgabe, in dem es nur eine Gutschrift gibt: einmalig 0, wöchentlich der Montag der Woche,
+     * sonst der Tag. Der logische Tag läuft nie rückwärts, also öffnet auch eine verstellte Uhr keinen alten Zeitraum.
+     */
+    public static int period(int repeat, int day) {
+        if (repeat == ONCE) return 0;
+        return repeat == WEEKLY ? day - weekday(day) : day;
     }
 
     /** Der Tag läuft nie rückwärts: Eine zurückgestellte Uhr bringt keinen frischen oder alten Tag. */

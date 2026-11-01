@@ -26,10 +26,16 @@
     <string name="sc_kids_task_open">to do</string>
     <string name="sc_kids_task_free">not today</string>
     <string name="sc_kids_task_waiting">waiting for a parent</string>
-    <string name="sc_kids_task_done">done</string>
-    <string name="sc_kids_task_again">try again</string>
+    <string name="sc_kids_task_done">confirmed</string>
+    <string name="sc_kids_task_again">rejected</string>
     <string name="sc_kids_time_pill">%1$d min left</string>
     <string name="sc_kids_call_parents">Please call a parent.</string>
     <string name="sc_kids_time_over">Time is up</string>
     <string name="sc_kids_credit">Great! +%1$d minutes: %2$s</string>
+    <string name="sc_kids_tv_off">Screen-free day today.</string>
+    <string name="sc_kids_tv_from">TV starts at %1$02d:%2$02d.</string>
+    <string name="sc_task_cat_school">School and learning</string>
+    <string name="sc_task_cat_room">Room and tidying</string>
+    <string name="sc_task_cat_home">Home and family help</string>
+    <string name="sc_task_cat_special">Special tasks</string>
 </resources>

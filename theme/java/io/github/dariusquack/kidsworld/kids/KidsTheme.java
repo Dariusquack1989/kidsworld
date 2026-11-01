@@ -111,6 +111,7 @@ public final class KidsTheme implements HomeTheme {
                 else if (guardMissing(shown.get(index).pkg)) showToast(host.getString(R.string.sc_kids_call_parents), false);
                 else if (gate.mayRun(shown.get(index).pkg)) host.launch(shown.get(index));
                 else if (gate.block() == KidsTime.Block.LIMIT) showToast(host.getString(R.string.sc_kids_limit_text), false);
+                else if (gate.block() == KidsTime.Block.WINDOW) showToast(windowText(), false);
                 else checkGate();
             }
 
@@ -221,6 +222,16 @@ public final class KidsTheme implements HomeTheme {
         if (KidsGuard.running() || profiles.active().free.contains(pkg)) return false;
         lock.markGuardDown();
         return true;
+    }
+
+    /** Warum jetzt keine App startet: fernsehfreier Tag, noch zu früh oder schon vorbei. */
+    private String windowText() {
+        KidsProfile rules = gate.rulesToday(profiles.active());
+        if (!rules.tvOn) return host.getString(R.string.sc_kids_tv_off);
+        if (KidsGate.minuteNow() < rules.tvFrom) {
+            return host.getString(R.string.sc_kids_tv_from, rules.tvFrom / 60, rules.tvFrom % 60);
+        }
+        return host.getString(R.string.sc_kids_bed_text);
     }
 
     private void closeTasks() {

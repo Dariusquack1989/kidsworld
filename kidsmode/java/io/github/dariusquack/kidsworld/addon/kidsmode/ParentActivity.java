@@ -368,16 +368,16 @@ public final class ParentActivity extends Activity {
         });
         addButton(limitLabel(p), v -> {
             KidsProfile c = child(p.id);
-            c.baseMin = next(LIMITS, c.baseMin);
-            c.timeOn = c.baseMin > 0;
-            if (c.maxTotalMin > 0 && c.maxTotalMin < c.baseMin) c.maxTotalMin = c.baseMin;
+            KidsProfile.Day d = todayOf(c);
+            d.base = next(LIMITS, d.base);
+            c.timeOn = d.base > 0;
             profiles.save(c);
             showChild(p.id);
         });
         addButton(bedLabel(p), v -> {
             KidsProfile c = child(p.id);
-            c.bedFrom = next(BEDTIMES, c.bedFrom);
-            c.bedTo = c.bedFrom < 0 ? -1 : BED_END;
+            KidsProfile.Day d = todayOf(c);
+            d.to = next(TV_ENDS, d.to);
             profiles.save(c);
             showChild(p.id);
         });
@@ -397,8 +397,8 @@ public final class ParentActivity extends Activity {
     }
 
     private static final int[] LIMITS = {0, 30, 60, 90, 120, 180};
-    private static final int[] BEDTIMES = {-1, 18 * 60, 19 * 60, 19 * 60 + 30, 20 * 60, 20 * 60 + 30, 21 * 60};
-    private static final int BED_END = 7 * 60;
+    /** Am TV lässt sich nur der heutige Tag ändern; die ganze Woche gibt es am Handy. */
+    private static final int[] TV_ENDS = {KidsProfile.WHOLE_DAY_END, 18 * 60, 19 * 60, 19 * 60 + 30, 20 * 60, 20 * 60 + 30, 21 * 60};
     private static final int BONUS_MIN = 30;
 
     private static int next(int[] options, int current) {
@@ -408,13 +408,18 @@ public final class ParentActivity extends Activity {
         return options[0];
     }
 
+    private KidsProfile.Day todayOf(KidsProfile p) {
+        return p.week()[KidsCalendar.weekday(db.today())];
+    }
+
     private String limitLabel(KidsProfile p) {
-        return p.timeOn ? getString(R.string.sc_parent_limit, p.baseMin) : getString(R.string.sc_parent_limit_off);
+        return p.timeOn ? getString(R.string.sc_parent_limit, todayOf(p).base) : getString(R.string.sc_parent_limit_off);
     }
 
     private String bedLabel(KidsProfile p) {
-        if (p.bedFrom < 0) return getString(R.string.sc_parent_bed_off);
-        return getString(R.string.sc_parent_bed, p.bedFrom / 60, p.bedFrom % 60, p.bedTo / 60, p.bedTo % 60);
+        KidsProfile.Day d = todayOf(p);
+        if (d.from == 0 && d.to == KidsProfile.WHOLE_DAY_END) return getString(R.string.sc_parent_bed_off);
+        return getString(R.string.sc_parent_bed, d.from / 60, d.from % 60, d.to / 60, d.to % 60);
     }
 
     private View addButton(String label, View.OnClickListener click) {
