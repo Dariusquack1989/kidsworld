@@ -88,6 +88,10 @@ Open `http://<tv ip>:8686` in the phone's browser. To keep it on the home screen
 screen". Browsers install web apps only over HTTPS, so on this plain HTTP page you get a shortcut. Give the TV a fixed
 address in your router, because the shortcut holds the IP address.
 
+If a phone shows `ERR_TOO_MANY_RETRIES` or cannot open the page while the internet works, the browser may lack access to
+the local network. On newer Android versions, allow "Nearby devices" or "Local network" for the browser in the app's
+permissions.
+
 ## Permissions and background work
 
 | Item | Why |
